@@ -36,11 +36,23 @@ class AdbHelper {
         }
 
         fun swipeUp(){
-            ProcessBuilder("adb", "shell", "input", "swipe", "500", "1500", "500", "500").start().waitFor()
+            swipe(500, 1500, 500, 500)
         }
 
         fun swipeDown(){
-            ProcessBuilder("adb", "shell", "input", "swipe", "500", "500", "500", "1500").start().waitFor()
+            swipe(500,500, 500, 1500)
+        }
+
+        fun swipeLeft(){
+            swipe(500, 500, 1500, 500)
+        }
+
+        fun swipeRight(){
+            swipe(1500, 500, 500, 500)
+        }
+
+        fun swipe(fromX:Int, fromY:Int, toX:Int, toY:Int){
+            ProcessBuilder("adb", "shell", "input", "swipe", "$fromX", "$fromY", "$toX", "$toY").start().waitFor()
         }
     }
 }

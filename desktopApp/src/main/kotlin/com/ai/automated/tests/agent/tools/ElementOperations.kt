@@ -86,6 +86,30 @@ class ElementOperations(private var element: UiElement, val onNewScreenDump:(Fil
 
     //----
     @Tool
+    @LLMDescription("Execute this when you have to swipe right the screen")
+    fun swipeRight() {
+        println("Swipe right")
+        AdbHelper.swipeRight()
+    }
+
+    //----
+    @Tool
+    @LLMDescription("Execute this when you have to swipe left the screen")
+    fun swipeLeft() {
+        println("Swipe left")
+        AdbHelper.swipeLeft()
+    }
+
+    //----
+    @Tool
+    @LLMDescription("Execute this when you have to execute the swipe action on the screen when start(x,y) and end(x,y) coordinates are provided")
+    fun swipe(sx:Int, sy:Int, ex:Int, ey:Int) {
+        println("Swiped from: $sx,$sy  to $ex, $ey")
+        AdbHelper.swipeDown()
+    }
+
+    //----
+    @Tool
     @LLMDescription("Execute this when you have to go back the screen or hit the back button")
     fun goBack(){
         AdbHelper.goBack()
