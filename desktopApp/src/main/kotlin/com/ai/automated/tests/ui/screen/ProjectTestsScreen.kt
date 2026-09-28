@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ai.automated.tests.project.Project
 import com.ai.automated.tests.ui.components.AppButton
+import com.ai.automated.tests.ui.components.AppHeader
 import com.ai.automated.tests.ui.components.AppTextField
 import com.ai.automated.tests.ui.components.FieldLabel
 import com.ai.automated.tests.ui.components.ModalSurface
@@ -109,11 +110,11 @@ fun ProjectTestsScreen(
             .fillMaxSize()
             .background(AppBackground)
     ) {
-        ProjectTestsHeader(
-            project = project,
-            testCount = tests.size,
-            onBack = onBack,
-            onRunAll = {
+        AppHeader(
+            title = project.name,
+            subtitle = "${tests.size} ${if (tests.size == 1) "test" else "tests"} in this project",
+            actionText = "▶  Run all tests",
+            onAction = {
                 if (tests.isNotEmpty()) {
                     val timestamp = "Last run ${formatCurrentTimestamp()}"
                     tests.indices.forEach { index ->
@@ -121,7 +122,9 @@ fun ProjectTestsScreen(
                     }
                     runMessage = "Batch run requested for ${tests.size} tests."
                 }
-            }
+            },
+            onBack = onBack,
+            actionBackgroundColor = if (tests.isNotEmpty()) Primary else Outline
         )
 
         Column(
@@ -207,80 +210,6 @@ fun ProjectTestsScreen(
                 testPendingDeletion = null
                 runMessage = "“${test.title}” was deleted."
             }
-        )
-    }
-}
-
-@Composable
-private fun ProjectTestsHeader(
-    project: Project,
-    testCount: Int,
-    onBack: () -> Unit,
-    onRunAll: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Surface)
-            .border(
-                width = 1.dp,
-                color = Outline.copy(alpha = 0.55f),
-                shape = RoundedCornerShape(0.dp)
-            )
-            .padding(horizontal = 32.dp, vertical = 20.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(42.dp)
-                .clip(RoundedCornerShape(11.dp))
-                .border(
-                    width = 1.dp,
-                    color = Outline,
-                    shape = RoundedCornerShape(11.dp)
-                )
-                .clickable(onClick = onBack),
-            contentAlignment = Alignment.Center
-        ) {
-            BasicText(
-                text = "←",
-                style = TextStyle(
-                    color = TextPrimary,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            )
-        }
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            BasicText(
-                text = project.name,
-                style = TextStyle(
-                    color = TextPrimary,
-                    fontSize = 25.sp,
-                    lineHeight = 31.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            BasicText(
-                text = "$testCount ${if (testCount == 1) "test" else "tests"} in this project",
-                style = TextStyle(
-                    color = TextSecondary,
-                    fontSize = 14.sp
-                )
-            )
-        }
-
-        AppButton(
-            text = "▶  Run all tests",
-            onClick = onRunAll,
-            backgroundColor = if (testCount > 0) Primary else Outline,
-            contentColor = Color.White
         )
     }
 }

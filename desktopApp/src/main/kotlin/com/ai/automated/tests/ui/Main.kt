@@ -87,7 +87,12 @@ private fun ProjectApplication() {
             )
         } else {
             Column(modifier = Modifier.fillMaxSize()) {
-                AppHeader(onAddProject = { editorState = EditorState.Adding })
+                AppHeader(
+                    title = "Projects",
+                    subtitle = "Create and manage your automated test projects.",
+                    actionText = "+  Add project",
+                    onAction = { editorState = EditorState.Adding }
+                )
 
                 if (projects.isEmpty()) {
                     EmptyProjects(

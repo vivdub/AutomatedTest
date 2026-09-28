@@ -3,12 +3,16 @@ package com.ai.automated.tests.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
@@ -26,9 +30,18 @@ import com.ai.automated.tests.ui.theme.Theme.Companion.TextPrimary
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
 
 @Composable
-fun AppHeader(onAddProject: () -> Unit) {
+fun AppHeader(
+    title: String,
+    subtitle: String,
+    actionText: String,
+    onAction: () -> Unit,
+    modifier: Modifier = Modifier,
+    onBack: (() -> Unit)? = null,
+    actionBackgroundColor: Color = Primary,
+    actionContentColor: Color = Color.White
+) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(Surface)
             .border(
@@ -38,18 +51,45 @@ fun AppHeader(onAddProject: () -> Unit) {
             .padding(horizontal = 32.dp, vertical = 22.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        if (onBack != null) {
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .border(
+                        width = 1.dp,
+                        color = Outline,
+                        shape = RoundedCornerShape(11.dp)
+                    )
+                    .clickable(onClick = onBack),
+                contentAlignment = Alignment.Center
+            ) {
+                BasicText(
+                    text = "←",
+                    style = TextStyle(
+                        color = TextPrimary,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+        }
+
         Column(modifier = Modifier.weight(1f)) {
             BasicText(
-                text = "Projects",
+                text = title,
                 style = TextStyle(
                     color = TextPrimary,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
                 )
             )
+
             Spacer(modifier = Modifier.height(4.dp))
+
             BasicText(
-                text = "Create and manage your automated test projects.",
+                text = subtitle,
                 style = TextStyle(
                     color = TextSecondary,
                     fontSize = 14.sp
@@ -57,11 +97,13 @@ fun AppHeader(onAddProject: () -> Unit) {
             )
         }
 
+        Spacer(modifier = Modifier.width(20.dp))
+
         AppButton(
-            text = "+  Add project",
-            onClick = onAddProject,
-            backgroundColor = Primary,
-            contentColor = Color.White
+            text = actionText,
+            onClick = onAction,
+            backgroundColor = actionBackgroundColor,
+            contentColor = actionContentColor
         )
     }
 }
