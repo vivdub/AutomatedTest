@@ -5,7 +5,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -19,9 +24,9 @@ import com.ai.automated.tests.ui.components.project.EmptyProjects
 import com.ai.automated.tests.ui.components.project.ProjectDeleteConfirmation
 import com.ai.automated.tests.ui.components.project.ProjectEditor
 import com.ai.automated.tests.ui.components.project.ProjectGrid
+import com.ai.automated.tests.ui.screen.ProjectTestsScreen
 import com.ai.automated.tests.ui.theme.Theme.Companion.AppBackground
 import java.time.LocalDate
-
 
 private sealed interface EditorState {
     data object Adding : EditorState
@@ -66,31 +71,42 @@ private fun ProjectApplication() {
 
     var editorState by remember { mutableStateOf<EditorState?>(null) }
     var projectPendingDeletion by remember { mutableStateOf<Project?>(null) }
+    var selectedProject by remember { mutableStateOf<Project?>(null) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(AppBackground)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            AppHeader(onAddProject = { editorState = EditorState.Adding })
+        val openProject = selectedProject
 
-            if (projects.isEmpty()) {
-                EmptyProjects(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(32.dp),
-                    onAddProject = { editorState = EditorState.Adding }
-                )
-            } else {
-                ProjectGrid(
-                    projects = projects,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 32.dp, vertical = 28.dp),
-                    onEdit = { editorState = EditorState.Editing(it) },
-                    onDelete = { projectPendingDeletion = it }
-                )
+        if (openProject != null) {
+            ProjectTestsScreen(
+                project = openProject,
+                onBack = { selectedProject = null }
+            )
+        } else {
+            Column(modifier = Modifier.fillMaxSize()) {
+                AppHeader(onAddProject = { editorState = EditorState.Adding })
+
+                if (projects.isEmpty()) {
+                    EmptyProjects(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(32.dp),
+                        onAddProject = { editorState = EditorState.Adding }
+                    )
+                } else {
+                    ProjectGrid(
+                        projects = projects,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 32.dp, vertical = 28.dp),
+                        onOpen = { selectedProject = it },
+                        onEdit = { editorState = EditorState.Editing(it) },
+                        onDelete = { projectPendingDeletion = it }
+                    )
+                }
             }
         }
 

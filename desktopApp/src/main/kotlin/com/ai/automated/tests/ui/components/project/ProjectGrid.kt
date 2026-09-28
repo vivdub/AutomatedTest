@@ -1,5 +1,6 @@
 package com.ai.automated.tests.ui.components.project
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import com.ai.automated.tests.project.Project
 fun ProjectGrid(
     projects: List<Project>,
     modifier: Modifier = Modifier,
+    onOpen: (Project) -> Unit,
     onEdit: (Project) -> Unit,
     onDelete: (Project) -> Unit
 ) {
@@ -46,7 +48,9 @@ fun ProjectGrid(
                     rowProjects.forEach { project ->
                         ProjectCard(
                             project = project,
-                            modifier = Modifier.width(cardWidth),
+                            modifier = Modifier
+                                .width(cardWidth)
+                                .clickable { onOpen(project) },
                             onEdit = { onEdit(project) },
                             onDelete = { onDelete(project) }
                         )
