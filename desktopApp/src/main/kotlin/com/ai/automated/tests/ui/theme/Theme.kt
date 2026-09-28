@@ -1,6 +1,7 @@
 package com.ai.automated.tests.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import java.time.format.DateTimeFormatter
 
 class Theme {
     companion object {
@@ -14,5 +15,10 @@ class Theme {
         val Outline = Color(0xFFD0CCD5)
         val Danger = Color(0xFFB3261E)
         val DangerContainer = Color(0xFFFFDAD6)
+
+        val TestCardBackground = Color(0xFFFCFBFD)
+        val SuccessBackground = Color(0xFFE3F3E8)
+        val SuccessText = Color(0xFF246B3D)
+        val DangerBackground = Color(0xFFFFDAD6)
     }
 }

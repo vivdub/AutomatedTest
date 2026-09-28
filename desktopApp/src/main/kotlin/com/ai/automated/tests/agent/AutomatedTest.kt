@@ -91,7 +91,7 @@ class AutomatedTest {
             //TestCase("On the screen, find: Download, then click it. Wait for 2 seconds. Capture new screen. Verify if RazerRecordings exist on the screen. Go back."),
             //TestCase("On the screen, find: Music, then click it. Wait for 2 seconds. Capture new screen. Verify if RazerRecordings exist on the screen. Go back."),
             //TestCase("scroll down, wait for 1 second, capture screen, verify 'ui.xml' exist on screen"),
-            TestCase("Click at (260,650), type 'viv@razer.com', click at (260, 720), type '12345', click (220,870), wait for 4 seconds, capture new screen, verify if 'Office' exists on screen.")
+            TestCase("","Click at (260,650), type 'viv@razer.com', click at (260, 720), type '12345', click (220,870), wait for 4 seconds, capture new screen, verify if 'Office' exists on screen.")
         )
         /*AdbHelper.apply {
             click(260,720)
