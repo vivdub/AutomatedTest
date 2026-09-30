@@ -10,10 +10,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +42,7 @@ import com.ai.automated.tests.ui.theme.Theme.Companion.Surface
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextPrimary
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
 
+private const val MaxTestTitleLength = 120
 private const val MaxTestDescriptionLength = 500
 
 @Composable
@@ -48,102 +52,97 @@ fun TestEditor(
     onSave: (String, String) -> Unit
 ) {
     var title by remember(test.id) {
-        mutableStateOf(test.title)
+        mutableStateOf(test.title.take(MaxTestTitleLength))
     }
     var description by remember(test.id) {
-        mutableStateOf(test.description)
+        mutableStateOf(test.description.take(MaxTestDescriptionLength))
     }
     var showTitleError by remember(test.id) {
         mutableStateOf(false)
     }
 
-    val hasTitleError = showTitleError && title.isBlank()
+    val trimmedTitle = title.trim()
+    val hasTitleError = showTitleError && trimmedTitle.isEmpty()
+    val scrollState = rememberScrollState()
 
     ModalSurface(onDismiss = onDismiss) {
         Column(
             modifier = Modifier
-                .widthIn(min = 480.dp, max = 590.dp)
-                .heightIn(max = 650.dp)
-                .clip(RoundedCornerShape(22.dp))
+                .widthIn(min = 440.dp, max = 540.dp)
+                .heightIn(max = 540.dp)
+                .clip(RoundedCornerShape(18.dp))
                 .background(Surface)
         ) {
             Column(
                 modifier = Modifier
+                    .weight(1f, fill = false)
                     .fillMaxWidth()
-                    .padding(horizontal = 30.dp, vertical = 28.dp)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 28.dp, vertical = 24.dp)
             ) {
                 BasicText(
                     text = "Edit test",
                     style = TextStyle(
                         color = TextPrimary,
-                        fontSize = 24.sp,
-                        lineHeight = 30.sp,
+                        fontSize = 22.sp,
+                        lineHeight = 28.sp,
                         fontWeight = FontWeight.Bold
                     )
                 )
 
-                Spacer(modifier = Modifier.height(5.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 BasicText(
-                    text = "Update the test title and description.",
+                    text = "Update the details used to identify and describe this test.",
                     style = TextStyle(
                         color = TextSecondary,
-                        fontSize = 14.sp
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp
                     )
                 )
 
-                Spacer(modifier = Modifier.height(26.dp))
+                Spacer(modifier = Modifier.height(22.dp))
 
                 FieldLabel("Test title *")
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(7.dp))
 
                 AppTextField(
                     value = title,
                     onValueChange = {
-                        title = it
+                        title = it.take(MaxTestTitleLength)
                         if (it.isNotBlank()) {
                             showTitleError = false
                         }
                     },
                     placeholder = "Enter a descriptive test title",
-                    isError = hasTitleError
+                    isError = hasTitleError,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
                 )
 
                 if (hasTitleError) {
-                    Spacer(modifier = Modifier.height(7.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     BasicText(
-                        text = "Enter a title before saving.",
+                        text = "A test title is required.",
                         style = TextStyle(
                             color = Danger,
                             fontSize = 12.sp,
+                            lineHeight = 16.sp,
                             fontWeight = FontWeight.Medium
                         )
                     )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-                FieldLabel("Description")
-                Spacer(modifier = Modifier.height(8.dp))
-
-                AppTextField(
-                    value = description,
-                    onValueChange = {
-                        if (it.length <= MaxTestDescriptionLength) {
-                            description = it
-                        }
-                    },
-                    placeholder = "Describe the purpose and expected outcome of this test",
-                    singleLine = false,
-                    modifier = Modifier.height(120.dp)
-                )
-
-                Spacer(modifier = Modifier.height(7.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    FieldLabel("Description")
+
                     BasicText(
                         text = "Optional",
                         style = TextStyle(
@@ -151,7 +150,28 @@ fun TestEditor(
                             fontSize = 12.sp
                         )
                     )
+                }
 
+                Spacer(modifier = Modifier.height(7.dp))
+
+                AppTextField(
+                    value = description,
+                    onValueChange = {
+                        description = it.take(MaxTestDescriptionLength)
+                    },
+                    placeholder = "Describe the purpose and expected outcome",
+                    singleLine = false,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(92.dp)
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
                     BasicText(
                         text = "${description.length}/$MaxTestDescriptionLength",
                         style = TextStyle(
@@ -166,14 +186,14 @@ fun TestEditor(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(1.dp)
-                    .background(Outline.copy(alpha = 0.6f))
+                    .background(Outline.copy(alpha = 0.65f))
             )
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color(0xFFFCFBFD))
-                    .padding(horizontal = 30.dp, vertical = 18.dp),
+                    .padding(horizontal = 28.dp, vertical = 16.dp),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -185,12 +205,11 @@ fun TestEditor(
                     borderColor = Outline
                 )
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(10.dp))
 
                 AppButton(
-                    text = "Save",
+                    text = "Save changes",
                     onClick = {
-                        val trimmedTitle = title.trim()
                         if (trimmedTitle.isEmpty()) {
                             showTitleError = true
                         } else {
