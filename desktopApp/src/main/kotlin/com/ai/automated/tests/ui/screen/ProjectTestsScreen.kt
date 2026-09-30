@@ -94,7 +94,7 @@ fun ProjectTestsScreen(
         AppHeader(
             title = project.name,
             subtitle = "${tests.size} ${if (tests.size == 1) "test" else "tests"} in this project",
-            actionText = "▶  Run all tests",
+            actionText = "▶  Run",
             onAction = {
                 if (tests.isNotEmpty()) {
                     val timestamp = "Last run ${formatCurrentTimestamp()}"

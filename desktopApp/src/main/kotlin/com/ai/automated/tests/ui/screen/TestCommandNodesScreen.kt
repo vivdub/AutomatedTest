@@ -33,6 +33,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ai.automated.tests.cases.TestCase
 import com.ai.automated.tests.ui.components.AppButton
+import com.ai.automated.tests.ui.components.AppHeader
+import com.ai.automated.tests.ui.components.test.command.AvailableCommandCard
+import com.ai.automated.tests.ui.components.test.command.EmptyCommandSequence
+import com.ai.automated.tests.ui.components.test.command.SelectedCommandCard
 import com.ai.automated.tests.ui.theme.Theme.Companion.AppBackground
 import com.ai.automated.tests.ui.theme.Theme.Companion.Danger
 import com.ai.automated.tests.ui.theme.Theme.Companion.DangerBackground
@@ -46,10 +50,7 @@ import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
 import com.ai.automated.tests.util.test.CommandNode
 
 @Composable
-fun TestCommandNodesScreen(
-    test: TestCase,
-    onBack: () -> Unit
-) {
+fun TestCommandNodesScreen(test: TestCase, onBack: () -> Unit) {
     val commandNodes = remember(test.id) {
         mutableStateListOf<CommandNode>().apply {
             addAll(test.commandNodes)
@@ -59,37 +60,25 @@ fun TestCommandNodesScreen(
         CommandNode.all().distinctBy { it.code }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(AppBackground)
-    ) {
-        CommandNodesHeader(
-            testTitle = test.title,
-            commandCount = commandNodes.size,
-            onBack = onBack
+    Column(modifier = Modifier.fillMaxSize().background(AppBackground)) {
+        val commandCount = commandNodes.size
+        AppHeader(
+            title = test.title,
+            subtitle = "$commandCount ${if (commandCount == 1) "command" else "commands"} in this test",
+            actionText = "▶  Run all commands",
+            onAction = {},
+            onBack = onBack,
+            actionBackgroundColor = if (commandNodes.isNotEmpty()) Primary else Outline
         )
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 32.dp, vertical = 28.dp),
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 32.dp, vertical = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .widthIn(max = 960.dp)
-            ) {
+            Column(modifier = Modifier.fillMaxWidth().widthIn(max = 960.dp)) {
                 BasicText(
                     text = "COMMAND SEQUENCE",
-                    style = TextStyle(
-                        color = TextSecondary,
-                        fontSize = 12.sp,
-                        letterSpacing = 1.1.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    style = TextStyle(color = TextSecondary, fontSize = 12.sp, letterSpacing = 1.1.sp, fontWeight = FontWeight.Bold)
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -176,324 +165,6 @@ fun TestCommandNodesScreen(
 
                 Spacer(modifier = Modifier.height(28.dp))
             }
-        }
-    }
-}
-
-@Composable
-private fun CommandNodesHeader(
-    testTitle: String,
-    commandCount: Int,
-    onBack: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Surface)
-            .border(
-                width = 1.dp,
-                color = Outline.copy(alpha = 0.6f)
-            )
-            .padding(horizontal = 28.dp, vertical = 18.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(PrimaryContainer)
-                .clickable(onClick = onBack),
-            contentAlignment = Alignment.Center
-        ) {
-            BasicText(
-                text = "←",
-                style = TextStyle(
-                    color = PrimaryDark,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-        }
-
-        Spacer(modifier = Modifier.width(14.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            BasicText(
-                text = testTitle,
-                style = TextStyle(
-                    color = TextPrimary,
-                    fontSize = 20.sp,
-                    lineHeight = 26.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                maxLines = 1
-            )
-
-            Spacer(modifier = Modifier.height(2.dp))
-
-            BasicText(
-                text = "$commandCount ${if (commandCount == 1) "command" else "commands"} in this test",
-                style = TextStyle(
-                    color = TextSecondary,
-                    fontSize = 13.sp
-                )
-            )
-        }
-    }
-}
-
-@Composable
-private fun EmptyCommandSequence() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(Surface)
-            .border(
-                width = 1.dp,
-                color = Outline.copy(alpha = 0.7f),
-                shape = RoundedCornerShape(16.dp)
-            )
-            .padding(horizontal = 24.dp, vertical = 30.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(PrimaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
-            BasicText(
-                text = "+",
-                style = TextStyle(
-                    color = PrimaryDark,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        BasicText(
-            text = "No commands added",
-            style = TextStyle(
-                color = TextPrimary,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        )
-
-        Spacer(modifier = Modifier.height(5.dp))
-
-        BasicText(
-            text = "Choose an available command below to build this test.",
-            style = TextStyle(
-                color = TextSecondary,
-                fontSize = 13.sp,
-                lineHeight = 19.sp
-            )
-        )
-    }
-}
-
-@Composable
-private fun SelectedCommandCard(
-    position: Int,
-    command: CommandNode,
-    onConfigure: () -> Unit,
-    onRun: () -> Unit,
-    onRemove: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = 1.dp,
-                shape = RoundedCornerShape(14.dp)
-            )
-            .clip(RoundedCornerShape(14.dp))
-            .background(Surface)
-            .border(
-                width = 1.dp,
-                color = Outline.copy(alpha = 0.55f),
-                shape = RoundedCornerShape(14.dp)
-            )
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(Primary),
-            contentAlignment = Alignment.Center
-        ) {
-            BasicText(
-                text = position.toString(),
-                style = TextStyle(
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-        }
-
-        Spacer(modifier = Modifier.width(14.dp))
-
-        CommandDetails(
-            command = command,
-            modifier = Modifier.weight(1f)
-        )
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            AppButton(
-                text = "Configure",
-                onClick = onConfigure,
-                backgroundColor = PrimaryContainer,
-                contentColor = PrimaryDark
-            )
-
-            AppButton(
-                text = "Run",
-                onClick = onRun,
-                backgroundColor = Primary,
-                contentColor = Color.White
-            )
-
-            AppButton(
-                text = "Remove",
-                onClick = onRemove,
-                backgroundColor = DangerBackground,
-                contentColor = Danger
-            )
-        }
-    }
-}
-
-@Composable
-private fun AvailableCommandCard(
-    command: CommandNode,
-    onAdd: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Surface)
-            .border(
-                width = 1.dp,
-                color = Outline.copy(alpha = 0.55f),
-                shape = RoundedCornerShape(14.dp)
-            )
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(PrimaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
-            BasicText(
-                text = command.title
-                    .trim()
-                    .firstOrNull()
-                    ?.uppercase()
-                    ?: "?",
-                style = TextStyle(
-                    color = PrimaryDark,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-        }
-
-        Spacer(modifier = Modifier.width(14.dp))
-
-        CommandDetails(
-            command = command,
-            modifier = Modifier.weight(1f)
-        )
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        AppButton(
-            text = "Add",
-            onClick = onAdd,
-            backgroundColor = PrimaryContainer,
-            contentColor = PrimaryDark
-        )
-    }
-}
-
-@Composable
-private fun CommandDetails(
-    command: CommandNode,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BasicText(
-                text = command.title,
-                style = TextStyle(
-                    color = TextPrimary,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            )
-
-            Spacer(modifier = Modifier.width(9.dp))
-
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(AppBackground)
-                    .padding(horizontal = 7.dp, vertical = 3.dp)
-            ) {
-                BasicText(
-                    text = command.code,
-                    style = TextStyle(
-                        color = TextSecondary,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        BasicText(
-            text = command.description,
-            style = TextStyle(
-                color = TextSecondary,
-                fontSize = 13.sp,
-                lineHeight = 18.sp
-            ),
-            maxLines = 2
-        )
-
-        if (command.values.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(5.dp))
-
-            BasicText(
-                text = "Values: ${command.values.joinToString()}",
-                style = TextStyle(
-                    color = TextSecondary.copy(alpha = 0.85f),
-                    fontSize = 12.sp
-                ),
-                maxLines = 1
-            )
         }
     }
 }
