@@ -116,6 +116,12 @@ fun TestCommandNodesScreen(
                             SelectedCommandCard(
                                 position = index + 1,
                                 command = command,
+                                onConfigure = {
+                                    // Configuration behavior will be added separately.
+                                },
+                                onRun = {
+                                    // Command execution behavior will be added separately.
+                                },
                                 onRemove = {
                                     commandNodes.removeAt(index)
                                     test.commandNodes.removeAt(index)
@@ -296,6 +302,8 @@ private fun EmptyCommandSequence() {
 private fun SelectedCommandCard(
     position: Int,
     command: CommandNode,
+    onConfigure: () -> Unit,
+    onRun: () -> Unit,
     onRemove: () -> Unit
 ) {
     Row(
@@ -341,12 +349,31 @@ private fun SelectedCommandCard(
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        AppButton(
-            text = "Remove",
-            onClick = onRemove,
-            backgroundColor = DangerBackground,
-            contentColor = Danger
-        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AppButton(
+                text = "Configure",
+                onClick = onConfigure,
+                backgroundColor = PrimaryContainer,
+                contentColor = PrimaryDark
+            )
+
+            AppButton(
+                text = "Run",
+                onClick = onRun,
+                backgroundColor = Primary,
+                contentColor = Color.White
+            )
+
+            AppButton(
+                text = "Remove",
+                onClick = onRemove,
+                backgroundColor = DangerBackground,
+                contentColor = Danger
+            )
+        }
     }
 }
 
