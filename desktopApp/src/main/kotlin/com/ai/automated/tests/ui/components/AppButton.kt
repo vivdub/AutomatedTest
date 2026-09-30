@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -25,11 +26,13 @@ fun AppButton(
     modifier: Modifier = Modifier,
     backgroundColor: Color,
     contentColor: Color,
-    borderColor: Color? = null
+    borderColor: Color? = null,
+    enabled: Boolean = true
 ) {
     val shape = RoundedCornerShape(10.dp)
     var buttonModifier = modifier
         .height(42.dp)
+        .alpha(if (enabled) 1f else 0.5f)
         .clip(shape)
         .background(backgroundColor)
 
@@ -43,7 +46,10 @@ fun AppButton(
 
     Box(
         modifier = buttonModifier
-            .clickable(onClick = onClick)
+            .clickable(
+                enabled = enabled,
+                onClick = onClick
+            )
             .padding(horizontal = 18.dp),
         contentAlignment = Alignment.Center
     ) {
