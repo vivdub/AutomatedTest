@@ -2,6 +2,7 @@ package com.ai.automated.tests.ui.components.test
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,7 @@ import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
 @Composable
 fun TestCard(
     test: TestCase,
+    onOpen: () -> Unit,
     onRun: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit
@@ -58,6 +60,7 @@ fun TestCard(
                 color = Outline.copy(alpha = 0.55f),
                 shape = RoundedCornerShape(16.dp)
             )
+            .clickable(onClick = onOpen)
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

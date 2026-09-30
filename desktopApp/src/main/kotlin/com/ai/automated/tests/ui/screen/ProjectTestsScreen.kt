@@ -1,24 +1,14 @@
 package com.ai.automated.tests.ui.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -27,44 +17,27 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ai.automated.tests.cases.TestCase
 import com.ai.automated.tests.project.Project
-import com.ai.automated.tests.ui.components.AppButton
 import com.ai.automated.tests.ui.components.AppHeader
-import com.ai.automated.tests.ui.components.AppTextField
-import com.ai.automated.tests.ui.components.FieldLabel
-import com.ai.automated.tests.ui.components.ModalSurface
 import com.ai.automated.tests.ui.components.test.DeleteTestConfirmation
 import com.ai.automated.tests.ui.components.test.EmptyTests
 import com.ai.automated.tests.ui.components.test.RunMessage
 import com.ai.automated.tests.ui.components.test.TestCard
 import com.ai.automated.tests.ui.components.test.TestEditor
 import com.ai.automated.tests.ui.theme.Theme.Companion.AppBackground
-import com.ai.automated.tests.ui.theme.Theme.Companion.Danger
 import com.ai.automated.tests.ui.theme.Theme.Companion.Outline
 import com.ai.automated.tests.ui.theme.Theme.Companion.Primary
-import com.ai.automated.tests.ui.theme.Theme.Companion.PrimaryContainer
-import com.ai.automated.tests.ui.theme.Theme.Companion.PrimaryDark
-import com.ai.automated.tests.ui.theme.Theme.Companion.SuccessBackground
-import com.ai.automated.tests.ui.theme.Theme.Companion.SuccessText
-import com.ai.automated.tests.ui.theme.Theme.Companion.Surface
-import com.ai.automated.tests.ui.theme.Theme.Companion.TextPrimary
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.UUID
 
 private val timestampFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy 'at' h:mm a")
-
 
 @Composable
 fun ProjectTestsScreen(
@@ -91,6 +64,9 @@ fun ProjectTestsScreen(
         )
     }
 
+    var selectedTest by remember(project.id) {
+        mutableStateOf<TestCase?>(null)
+    }
     var testBeingEdited by remember(project.id) {
         mutableStateOf<TestCase?>(null)
     }
@@ -99,6 +75,15 @@ fun ProjectTestsScreen(
     }
     var runMessage by remember(project.id) {
         mutableStateOf<String?>(null)
+    }
+
+    val openedTest = selectedTest
+    if (openedTest != null) {
+        TestCommandNodesScreen(
+            test = openedTest,
+            onBack = { selectedTest = null }
+        )
+        return
     }
 
     Column(
@@ -159,6 +144,7 @@ fun ProjectTestsScreen(
                     tests.forEach { test ->
                         TestCard(
                             test = test,
+                            onOpen = { selectedTest = test },
                             onRun = {
                                 val index = tests.indexOfFirst { it.id == test.id }
                                 if (index >= 0) {
@@ -210,8 +196,5 @@ fun ProjectTestsScreen(
     }
 }
 
-
-
-
-
-private fun formatCurrentTimestamp(): String = LocalDateTime.now().format(timestampFormatter)
+private fun formatCurrentTimestamp(): String =
+    LocalDateTime.now().format(timestampFormatter)
