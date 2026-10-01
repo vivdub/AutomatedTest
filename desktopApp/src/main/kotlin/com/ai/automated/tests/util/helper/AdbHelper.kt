@@ -1,7 +1,9 @@
 package com.ai.automated.tests.util.helper
 
+import java.awt.image.BufferedImage
 import java.io.File
 import java.lang.Thread.sleep
+import javax.imageio.ImageIO
 
 class AdbHelper {
 
@@ -53,6 +55,13 @@ class AdbHelper {
 
         fun swipe(fromX:Int, fromY:Int, toX:Int, toY:Int){
             ProcessBuilder("adb", "shell", "input", "swipe", "$fromX", "$fromY", "$toX", "$toY").start().waitFor()
+        }
+
+        fun takeScreenshot(): BufferedImage? {
+            val process = ProcessBuilder(
+                "adb", "exec-out", "screencap", "-p"
+            ).start()
+            return if(process.inputStream==null) null else ImageIO.read(process.inputStream)
         }
     }
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -16,24 +17,26 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ai.automated.tests.cases.TestCase
@@ -44,10 +47,14 @@ import com.ai.automated.tests.ui.components.test.command.SelectedCommandCard
 import com.ai.automated.tests.ui.theme.Theme.Companion.AppBackground
 import com.ai.automated.tests.ui.theme.Theme.Companion.Outline
 import com.ai.automated.tests.ui.theme.Theme.Companion.Primary
-import com.ai.automated.tests.ui.theme.Theme.Companion.Surface
-import com.ai.automated.tests.ui.theme.Theme.Companion.TextPrimary
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
+import com.ai.automated.tests.util.helper.AdbHelper
 import com.ai.automated.tests.util.test.CommandNode
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import java.lang.Thread.sleep
 
 @Composable
 fun TestCommandNodesScreen(test: TestCase, onBack: () -> Unit) {
@@ -60,6 +67,12 @@ fun TestCommandNodesScreen(test: TestCase, onBack: () -> Unit) {
         CommandNode.all().distinctBy { it.code }
     }
     var isDevicePaneExpanded by remember { mutableStateOf(true) }
+    var deviceScreen by remember { mutableStateOf<ImageBitmap?>(null) }
+    var job by remember { mutableStateOf<Job?>(null) }
+
+    LaunchedEffect(Unit) {
+        job = getDeviceScreen { deviceScreen = it }
+    }
 
     Column(modifier = Modifier.fillMaxSize().background(AppBackground)) {
         val commandCount = commandNodes.size
@@ -73,257 +86,144 @@ fun TestCommandNodesScreen(test: TestCase, onBack: () -> Unit) {
         )
 
         Row(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 32.dp, vertical = 28.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Column(modifier = Modifier.fillMaxWidth().widthIn(max = 960.dp)) {
-                    BasicText(
-                        text = "COMMAND SEQUENCE",
-                        style = TextStyle(
-                            color = TextSecondary,
-                            fontSize = 12.sp,
-                            letterSpacing = 1.1.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
 
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    BasicText(
-                        text = "Commands run in the order shown below.",
-                        style = TextStyle(
-                            color = TextSecondary,
-                            fontSize = 14.sp,
-                            lineHeight = 20.sp
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    if (commandNodes.isEmpty()) {
-                        EmptyCommandSequence()
-                    } else {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            commandNodes.forEachIndexed { index, command ->
-                                SelectedCommandCard(
-                                    position = index + 1,
-                                    command = command,
-                                    onConfigure = {
-                                        // Configuration behavior will be added separately.
-                                    },
-                                    onRun = {
-                                        // Command execution behavior will be added separately.
-                                    },
-                                    onRemove = {
-                                        commandNodes.removeAt(index)
-                                        test.commandNodes.removeAt(index)
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    BasicText(
-                        text = "AVAILABLE COMMANDS",
-                        style = TextStyle(
-                            color = TextSecondary,
-                            fontSize = 12.sp,
-                            letterSpacing = 1.1.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    BasicText(
-                        text = "Add an operation to the end of this test’s command sequence.",
-                        style = TextStyle(
-                            color = TextSecondary,
-                            fontSize = 14.sp,
-                            lineHeight = 20.sp
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        availableCommands.forEach { command ->
-                            AvailableCommandCard(
-                                command = command,
-                                onAdd = {
-                                    val newCommand = command.copy(
-                                        values = command.values.toMutableList()
-                                    )
-                                    commandNodes.add(newCommand)
-                                    test.commandNodes.add(newCommand)
-                                }
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(28.dp))
-                }
-            }
-
+            CommandsPane(commandNodes, availableCommands, test)
             AndroidDevicePane(
                 expanded = isDevicePaneExpanded,
                 onToggle = {
                     isDevicePaneExpanded = !isDevicePaneExpanded
-                }
+                    when(isDevicePaneExpanded){
+                        true -> job = getDeviceScreen { deviceScreen = it }
+                        else -> job?.cancel()
+                    }
+                },
+                bitmap = deviceScreen
             )
         }
     }
 }
 
-@Composable
-private fun AndroidDevicePane(
-    expanded: Boolean,
-    onToggle: () -> Unit
-) {
-    if (expanded) {
-        Column(
-            modifier = Modifier
-                .width(360.dp)
-                .fillMaxHeight()
-                .background(Surface)
-                .border(width = 1.dp, color = Outline)
-                .padding(20.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    BasicText(
-                        text = "ANDROID DEVICE",
-                        style = TextStyle(
-                            color = TextSecondary,
-                            fontSize = 12.sp,
-                            letterSpacing = 1.1.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    BasicText(
-                        text = "Live device UI",
-                        style = TextStyle(
-                            color = TextPrimary,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable(onClick = onToggle)
-                        .background(AppBackground)
-                        .border(
-                            width = 1.dp,
-                            color = Outline,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    BasicText(
-                        text = "›",
-                        style = TextStyle(
-                            color = TextPrimary,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-                }
+private fun getDeviceScreen(onFetched:(ImageBitmap)->Unit): Job {
+    var job:Job? = null
+    job =  CoroutineScope(Dispatchers.IO).launch {
+        while(job==null || job?.isActive == true) {
+            AdbHelper.takeScreenshot()?.let{
+                onFetched.invoke(it.toComposeImageBitmap())
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(9f / 16f)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(Color(0xFF1A1C20))
-                    .padding(10.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(AppBackground)
-                        .border(
-                            width = 1.dp,
-                            color = Outline,
-                            shape = RoundedCornerShape(16.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    BasicText(
-                        text = "Android device UI\nwill appear here",
-                        modifier = Modifier.padding(24.dp),
-                        style = TextStyle(
-                            color = TextSecondary,
-                            fontSize = 14.sp,
-                            lineHeight = 21.sp,
-                            textAlign = TextAlign.Center
-                        )
-                    )
-                }
-            }
+            sleep(300)
         }
-    } else {
-        Column(
-            modifier = Modifier
-                .width(48.dp)
-                .fillMaxHeight()
-                .background(Surface)
-                .border(width = 1.dp, color = Outline),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(onClick = onToggle)
-                    .padding(vertical = 16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                BasicText(
-                    text = "‹",
-                    style = TextStyle(
-                        color = TextPrimary,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-            }
+    }
+    return job
+}
 
+@Composable
+private fun RowScope.CommandsPane(
+    commandNodes: SnapshotStateList<CommandNode>,
+    availableCommands: List<CommandNode>,
+    test: TestCase
+) {
+    Column(
+        modifier = Modifier
+            .weight(1f)
+            .fillMaxHeight()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 32.dp, vertical = 28.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().widthIn(max = 960.dp)) {
             BasicText(
-                text = "DEVICE",
-                modifier = Modifier.padding(top = 8.dp),
+                text = "COMMAND SEQUENCE",
                 style = TextStyle(
                     color = TextSecondary,
-                    fontSize = 10.sp,
-                    letterSpacing = 1.sp,
+                    fontSize = 12.sp,
+                    letterSpacing = 1.1.sp,
                     fontWeight = FontWeight.Bold
                 )
             )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            BasicText(
+                text = "Commands run in the order shown below.",
+                style = TextStyle(
+                    color = TextSecondary,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (commandNodes.isEmpty()) {
+                EmptyCommandSequence()
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    commandNodes.forEachIndexed { index, command ->
+                        SelectedCommandCard(
+                            position = index + 1,
+                            command = command,
+                            onConfigure = {
+                                // Configuration behavior will be added separately.
+                            },
+                            onRun = {
+                                // Command execution behavior will be added separately.
+                            },
+                            onRemove = {
+                                commandNodes.removeAt(index)
+                                test.commandNodes.removeAt(index)
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            BasicText(
+                text = "AVAILABLE COMMANDS",
+                style = TextStyle(
+                    color = TextSecondary,
+                    fontSize = 12.sp,
+                    letterSpacing = 1.1.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            BasicText(
+                text = "Add an operation to the end of this test’s command sequence.",
+                style = TextStyle(
+                    color = TextSecondary,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                availableCommands.forEach { command ->
+                    AvailableCommandCard(
+                        command = command,
+                        onAdd = {
+                            val newCommand = command.copy(
+                                values = command.values.toMutableList()
+                            )
+                            commandNodes.add(newCommand)
+                            test.commandNodes.add(newCommand)
+                        }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
         }
     }
 }
