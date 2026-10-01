@@ -65,7 +65,7 @@ fun TestCommandNodesScreen(test: TestCase, onBack: () -> Unit) {
         AppHeader(
             title = test.title,
             subtitle = "$commandCount ${if (commandCount == 1) "command" else "commands"} in this test",
-            actionText = "▶  Run all commands",
+            actionText = "▶  Run all",
             onAction = {},
             onBack = onBack,
             actionBackgroundColor = if (commandNodes.isNotEmpty()) Primary else Outline
