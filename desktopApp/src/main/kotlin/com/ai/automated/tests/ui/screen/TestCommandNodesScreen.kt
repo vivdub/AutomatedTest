@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.ai.automated.tests.cases.TestCase
 import com.ai.automated.tests.ui.components.AppHeader
 import com.ai.automated.tests.ui.components.test.command.AvailableCommandCard
+import com.ai.automated.tests.ui.components.test.command.ConfigureCommandCard
 import com.ai.automated.tests.ui.components.test.command.EmptyCommandSequence
 import com.ai.automated.tests.ui.components.test.command.SelectedCommandCard
 import com.ai.automated.tests.ui.theme.Theme.Companion.AppBackground
@@ -122,6 +123,8 @@ private fun RowScope.CommandsPane(
     availableCommands: List<CommandNode>,
     test: TestCase
 ) {
+    var configureNode by remember{ mutableStateOf<CommandNode?>(null)}
+
     Column(
         modifier = Modifier
             .weight(1f)
@@ -157,6 +160,10 @@ private fun RowScope.CommandsPane(
             if (commandNodes.isEmpty()) {
                 EmptyCommandSequence()
             } else {
+                if(configureNode!=null){
+                    ConfigureCommandCard(configureNode!!)
+                    //return
+                }else{
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -167,6 +174,7 @@ private fun RowScope.CommandsPane(
                             command = command,
                             onConfigure = {
                                 // Configuration behavior will be added separately.
+                                configureNode = command
                             },
                             onRun = {
                                 // Command execution behavior will be added separately.
@@ -177,7 +185,7 @@ private fun RowScope.CommandsPane(
                             }
                         )
                     }
-                }
+                }}
             }
 
             Spacer(modifier = Modifier.height(32.dp))
