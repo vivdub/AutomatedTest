@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -33,14 +36,23 @@ import com.ai.automated.tests.ui.theme.Theme.Companion.Outline
 import com.ai.automated.tests.ui.theme.Theme.Companion.Surface
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextPrimary
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
+import kotlin.math.roundToInt
 
 @Composable
-fun AndroidDevicePane(expanded: Boolean, onToggle: () -> Unit, bitmap: ImageBitmap?=null) {
+fun AndroidDevicePane(
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    bitmap: ImageBitmap? = null,
+    onDeviceClick: (x: Int, y: Int) -> Unit = { _, _ -> }
+) {
     if (expanded) {
-        ExpandedContainer(onToggle = onToggle){
-            when(bitmap==null){
-                true -> WaitForImage()
-                else -> ShowImage(bitmap)
+        ExpandedContainer(onToggle = onToggle) {
+            when (bitmap) {
+                null -> WaitForImage()
+                else -> ShowImage(
+                    image = bitmap,
+                    onDeviceClick = onDeviceClick
+                )
             }
         }
     } else {
@@ -49,15 +61,66 @@ fun AndroidDevicePane(expanded: Boolean, onToggle: () -> Unit, bitmap: ImageBitm
 }
 
 @Composable
-private fun ShowImage(image: ImageBitmap) {
+private fun ShowImage(
+    image: ImageBitmap,
+    onDeviceClick: (x: Int, y: Int) -> Unit
+) {
     Image(
         bitmap = image,
-        contentDescription = "Android screen"
+        contentDescription = "Android screen",
+        contentScale = ContentScale.Fit,
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(image) {
+                detectTapGestures { tapPosition ->
+                    val imageWidth = image.width.toFloat()
+                    val imageHeight = image.height.toFloat()
+                    val containerWidth = size.width.toFloat()
+                    val containerHeight = size.height.toFloat()
+
+                    if (
+                        imageWidth <= 0f ||
+                        imageHeight <= 0f ||
+                        containerWidth <= 0f ||
+                        containerHeight <= 0f
+                    ) {
+                        return@detectTapGestures
+                    }
+
+                    val scale = minOf(
+                        containerWidth / imageWidth,
+                        containerHeight / imageHeight
+                    )
+                    val renderedWidth = imageWidth * scale
+                    val renderedHeight = imageHeight * scale
+                    val horizontalOffset = (containerWidth - renderedWidth) / 2f
+                    val verticalOffset = (containerHeight - renderedHeight) / 2f
+
+                    val isInsideImage =
+                        tapPosition.x >= horizontalOffset &&
+                            tapPosition.x < horizontalOffset + renderedWidth &&
+                            tapPosition.y >= verticalOffset &&
+                            tapPosition.y < verticalOffset + renderedHeight
+
+                    if (!isInsideImage) {
+                        return@detectTapGestures
+                    }
+
+                    val deviceX = ((tapPosition.x - horizontalOffset) / scale)
+                        .roundToInt()
+                        .coerceIn(0, image.width - 1)
+                    val deviceY = ((tapPosition.y - verticalOffset) / scale)
+                        .roundToInt()
+                        .coerceIn(0, image.height - 1)
+
+                    onDeviceClick(deviceX, deviceY)
+                }
+            }
     )
 }
 
 @Composable
-private fun WaitForImage(){
+private fun WaitForImage() {
     BasicText(
         text = "Android device UI\nwill appear here",
         modifier = Modifier.padding(24.dp),
@@ -111,7 +174,10 @@ private fun CollapsibleContainer(onToggle: () -> Unit) {
 }
 
 @Composable
-private fun ExpandedContainer(onToggle: () -> Unit, content: @Composable () -> Unit) {
+private fun ExpandedContainer(
+    onToggle: () -> Unit,
+    content: @Composable () -> Unit
+) {
     Column(
         modifier = Modifier
             .width(360.dp)
