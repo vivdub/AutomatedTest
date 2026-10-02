@@ -1,24 +1,18 @@
 package com.ai.automated.tests.ui.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -31,8 +25,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.text.TextStyle
@@ -87,13 +79,12 @@ fun TestCommandNodesScreen(test: TestCase, onBack: () -> Unit) {
         )
 
         Row(modifier = Modifier.fillMaxSize()) {
-
             CommandsPane(commandNodes, availableCommands, test)
             AndroidDevicePane(
                 expanded = isDevicePaneExpanded,
                 onToggle = {
                     isDevicePaneExpanded = !isDevicePaneExpanded
-                    when(isDevicePaneExpanded){
+                    when (isDevicePaneExpanded) {
                         true -> job = getDeviceScreen { deviceScreen = it }
                         else -> job?.cancel()
                     }
@@ -104,11 +95,11 @@ fun TestCommandNodesScreen(test: TestCase, onBack: () -> Unit) {
     }
 }
 
-private fun getDeviceScreen(onFetched:(ImageBitmap)->Unit): Job {
-    var job:Job? = null
-    job =  CoroutineScope(Dispatchers.IO).launch {
-        while(job==null || job?.isActive == true) {
-            AdbHelper.takeScreenshot()?.let{
+private fun getDeviceScreen(onFetched: (ImageBitmap) -> Unit): Job {
+    var job: Job? = null
+    job = CoroutineScope(Dispatchers.IO).launch {
+        while (job == null || job?.isActive == true) {
+            AdbHelper.takeScreenshot()?.let {
                 onFetched.invoke(it.toComposeImageBitmap())
             }
             sleep(300)
@@ -123,7 +114,7 @@ private fun RowScope.CommandsPane(
     availableCommands: List<CommandNode>,
     test: TestCase
 ) {
-    var configureNode by remember{ mutableStateOf<CommandNode?>(null)}
+    var configureNode by remember { mutableStateOf<CommandNode?>(null) }
 
     Column(
         modifier = Modifier
@@ -160,32 +151,40 @@ private fun RowScope.CommandsPane(
             if (commandNodes.isEmpty()) {
                 EmptyCommandSequence()
             } else {
-                if(configureNode!=null){
-                    ConfigureCommandCard(configureNode!!)
-                    //return
-                }else{
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    commandNodes.forEachIndexed { index, command ->
-                        SelectedCommandCard(
-                            position = index + 1,
-                            command = command,
-                            onConfigure = {
-                                // Configuration behavior will be added separately.
-                                configureNode = command
-                            },
-                            onRun = {
-                                // Command execution behavior will be added separately.
-                            },
-                            onRemove = {
-                                commandNodes.removeAt(index)
-                                test.commandNodes.removeAt(index)
-                            }
-                        )
+                val nodeBeingConfigured = configureNode
+                if (nodeBeingConfigured != null) {
+                    ConfigureCommandCard(
+                        commandNode = nodeBeingConfigured,
+                        onCancel = {
+                            configureNode = null
+                        },
+                        onSave = {
+                            configureNode = null
+                        }
+                    )
+                } else {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        commandNodes.forEachIndexed { index, command ->
+                            SelectedCommandCard(
+                                position = index + 1,
+                                command = command,
+                                onConfigure = {
+                                    configureNode = command
+                                },
+                                onRun = {
+                                    // Command execution behavior will be added separately.
+                                },
+                                onRemove = {
+                                    commandNodes.removeAt(index)
+                                    test.commandNodes.removeAt(index)
+                                }
+                            )
+                        }
                     }
-                }}
+                }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
