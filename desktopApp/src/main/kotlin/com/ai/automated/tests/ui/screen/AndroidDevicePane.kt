@@ -36,6 +36,7 @@ import com.ai.automated.tests.ui.theme.Theme.Companion.Outline
 import com.ai.automated.tests.ui.theme.Theme.Companion.Surface
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextPrimary
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
+import com.ai.automated.tests.util.helper.AdbHelper
 import kotlin.math.roundToInt
 
 @Composable
@@ -70,15 +71,21 @@ private fun ShowImage(
         contentDescription = "Android screen",
         contentScale = ContentScale.Fit,
         modifier = Modifier
-            .fillMaxSize()
+            .aspectRatio(image.width.toFloat() / image.height)
             .pointerInput(image) {
                 detectTapGestures { tapPosition ->
                     val imageWidth = image.width.toFloat()
                     val imageHeight = image.height.toFloat()
                     val containerWidth = size.width.toFloat()
                     val containerHeight = size.height.toFloat()
+                    val widthRatio = imageWidth / containerWidth
+                    val heightRatio = imageHeight / containerHeight
 
-                    if (
+                    val devicePoxX = (tapPosition.x * widthRatio).roundToInt()
+                    val devicePoxY = (tapPosition.y * heightRatio).roundToInt()
+
+                    onDeviceClick.invoke(devicePoxX, devicePoxY)
+                    /*if (
                         imageWidth <= 0f ||
                         imageHeight <= 0f ||
                         containerWidth <= 0f ||
@@ -113,7 +120,7 @@ private fun ShowImage(
                         .roundToInt()
                         .coerceIn(0, image.height - 1)
 
-                    onDeviceClick(deviceX, deviceY)
+                    onDeviceClick(deviceX, deviceY)*/
                 }
             }
     )
@@ -181,7 +188,7 @@ private fun ExpandedContainer(
     Column(
         modifier = Modifier
             .width(360.dp)
-            .fillMaxHeight()
+            //.fillMaxHeight()
             .background(Surface)
             .border(width = 1.dp, color = Outline)
             .padding(20.dp)

@@ -2,9 +2,15 @@ package com.ai.automated.tests.util.test
 
 //--------
 /** This class provides a way to store the operations */
-data class CommandNode (val code:String, @Transient val title:String, @Transient val description:String, val values: MutableList<String>, val configurable:Boolean = true) {
+data class CommandNode (
+    val code:String, @Transient val title:String, @Transient val description:String, val values: MutableList<String>,
+    @Transient val configurable:Boolean = true, @Transient val requires: List<String> = mutableListOf()
+) {
     companion object{
-        val Click = CommandNode("click","Click","Use this to trigger click on an element", mutableListOf())
+        val Click = CommandNode(
+            "click","Click","Use this to trigger click on an element", mutableListOf(), true,
+            listOf("X:", "Y:")
+        )
         val Back = CommandNode("back","Go Back","Use this to execute the back button", mutableListOf(), false)
         val Input = CommandNode("input","Input","Use this to input the text", mutableListOf())
         val SwipeUp = CommandNode("swipe_up","Swipe Up","Use this to trigger swipe up action on the screen", mutableListOf(), false)

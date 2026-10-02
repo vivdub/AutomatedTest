@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.ai.automated.tests.cases.TestCase
 import com.ai.automated.tests.ui.components.AppHeader
 import com.ai.automated.tests.ui.components.test.command.AvailableCommandCard
+import com.ai.automated.tests.ui.components.test.command.CommandsPane
 import com.ai.automated.tests.ui.components.test.command.ConfigureCommandCard
 import com.ai.automated.tests.ui.components.test.command.EmptyCommandSequence
 import com.ai.automated.tests.ui.components.test.command.SelectedCommandCard
@@ -47,6 +48,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.jetbrains.skia.Point
 import java.lang.Thread.sleep
 
 @Composable
@@ -62,6 +64,7 @@ fun TestCommandNodesScreen(test: TestCase, onBack: () -> Unit) {
     var isDevicePaneExpanded by remember { mutableStateOf(true) }
     var deviceScreen by remember { mutableStateOf<ImageBitmap?>(null) }
     var job by remember { mutableStateOf<Job?>(null) }
+    var deviceClickAt by remember { mutableStateOf<Pair<Int,Int>?>(null) }
 
     LaunchedEffect(Unit) {
         job = getDeviceScreen { deviceScreen = it }
@@ -79,7 +82,7 @@ fun TestCommandNodesScreen(test: TestCase, onBack: () -> Unit) {
         )
 
         Row(modifier = Modifier.fillMaxSize()) {
-            CommandsPane(commandNodes, availableCommands, test)
+            CommandsPane(commandNodes, availableCommands, test, deviceClickAt)
             AndroidDevicePane(
                 expanded = isDevicePaneExpanded,
                 onToggle = {
@@ -89,6 +92,7 @@ fun TestCommandNodesScreen(test: TestCase, onBack: () -> Unit) {
                         else -> job?.cancel()
                     }
                 },
+                onDeviceClick = { x,y -> deviceClickAt = Pair(x,y) },
                 bitmap = deviceScreen
             )
         }
@@ -106,131 +110,4 @@ private fun getDeviceScreen(onFetched: (ImageBitmap) -> Unit): Job {
         }
     }
     return job
-}
-
-@Composable
-private fun RowScope.CommandsPane(
-    commandNodes: SnapshotStateList<CommandNode>,
-    availableCommands: List<CommandNode>,
-    test: TestCase
-) {
-    var configureNode by remember { mutableStateOf<CommandNode?>(null) }
-
-    Column(
-        modifier = Modifier
-            .weight(1f)
-            .fillMaxHeight()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 32.dp, vertical = 28.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Column(modifier = Modifier.fillMaxWidth().widthIn(max = 960.dp)) {
-            BasicText(
-                text = "COMMAND SEQUENCE",
-                style = TextStyle(
-                    color = TextSecondary,
-                    fontSize = 12.sp,
-                    letterSpacing = 1.1.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            BasicText(
-                text = "Commands run in the order shown below.",
-                style = TextStyle(
-                    color = TextSecondary,
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp
-                )
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (commandNodes.isEmpty()) {
-                EmptyCommandSequence()
-            } else {
-                val nodeBeingConfigured = configureNode
-                if (nodeBeingConfigured != null) {
-                    ConfigureCommandCard(
-                        commandNode = nodeBeingConfigured,
-                        onCancel = {
-                            configureNode = null
-                        },
-                        onSave = {
-                            configureNode = null
-                        }
-                    )
-                } else {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        commandNodes.forEachIndexed { index, command ->
-                            SelectedCommandCard(
-                                position = index + 1,
-                                command = command,
-                                onConfigure = {
-                                    configureNode = command
-                                },
-                                onRun = {
-                                    // Command execution behavior will be added separately.
-                                },
-                                onRemove = {
-                                    commandNodes.removeAt(index)
-                                    test.commandNodes.removeAt(index)
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            BasicText(
-                text = "AVAILABLE COMMANDS",
-                style = TextStyle(
-                    color = TextSecondary,
-                    fontSize = 12.sp,
-                    letterSpacing = 1.1.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            BasicText(
-                text = "Add an operation to the end of this test’s command sequence.",
-                style = TextStyle(
-                    color = TextSecondary,
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp
-                )
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                availableCommands.forEach { command ->
-                    AvailableCommandCard(
-                        command = command,
-                        onAdd = {
-                            val newCommand = command.copy(
-                                values = command.values.toMutableList()
-                            )
-                            commandNodes.add(newCommand)
-                            test.commandNodes.add(newCommand)
-                        }
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(28.dp))
-        }
-    }
 }
