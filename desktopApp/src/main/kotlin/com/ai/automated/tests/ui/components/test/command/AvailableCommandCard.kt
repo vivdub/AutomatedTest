@@ -24,7 +24,7 @@ import com.ai.automated.tests.ui.theme.Theme.Companion.Outline
 import com.ai.automated.tests.ui.theme.Theme.Companion.PrimaryContainer
 import com.ai.automated.tests.ui.theme.Theme.Companion.PrimaryDark
 import com.ai.automated.tests.ui.theme.Theme.Companion.Surface
-import com.ai.automated.tests.util.test.CommandNode
+import com.ai.automated.tests.util.test.node.CommandNode
 
 @Composable
 fun AvailableCommandCard(

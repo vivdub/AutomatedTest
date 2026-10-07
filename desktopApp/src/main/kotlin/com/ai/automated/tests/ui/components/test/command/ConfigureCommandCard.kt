@@ -33,30 +33,35 @@ import androidx.compose.ui.unit.sp
 import com.ai.automated.tests.ui.theme.Theme.Companion.Outline
 import com.ai.automated.tests.ui.theme.Theme.Companion.Primary
 import com.ai.automated.tests.ui.theme.Theme.Companion.PrimaryContainer
+import com.ai.automated.tests.ui.theme.Theme.Companion.PrimaryDark
 import com.ai.automated.tests.ui.theme.Theme.Companion.Surface
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextPrimary
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
-import com.ai.automated.tests.util.test.CommandNode
+import com.ai.automated.tests.util.test.node.CommandNode
 
 @Composable
-fun ConfigureCommandCard(
-    commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>?,
-    onCancel: () -> Unit,
-    onSave: () -> Unit
-) {
+fun ConfigureCommandCard(commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>?, onCancel: () -> Unit, onSave: () -> Unit, onRun:(List<Any>)->Unit) {
+
     val fieldValues = remember(commandNode) {
-        mutableStateListOf<String>().apply {
-            commandNode.requires.forEachIndexed { index, _ ->
-                add(commandNode.values.getOrNull(index).orEmpty())
+        mutableStateListOf<Any>().apply {
+            commandNode.requiredData.forEachIndexed { index, _ ->
+                val data = commandNode.nodeData.getOrNull(index)
+                when(data!=null){
+                    true -> add(data)
+                    else -> when(commandNode.requiredData[index].type){
+                        CommandNode.NodeData.ValueType.Input -> add("")
+                        CommandNode.NodeData.ValueType.Coordinate -> add(Pair(0,0))
+                    }
+                }
             }
         }
     }
-    val canSave = fieldValues.all { it.isNotBlank() }
-    var currentFieldValueIndex by remember { mutableStateOf(0) }
+    val canSave = fieldValues.size == commandNode.requiredData.size
+    var currentFieldValueIndex by remember { mutableStateOf(-1) }
     var clickUtilised by remember { mutableStateOf(Pair(0,0)) }
 
-    if(deviceClickedAt != null && clickUtilised!=deviceClickedAt) {
-        fieldValues[currentFieldValueIndex] = deviceClickedAt.toString()
+    if(deviceClickedAt != null && currentFieldValueIndex!=-1 && clickUtilised!=deviceClickedAt && commandNode.requiredData[currentFieldValueIndex].type == CommandNode.NodeData.ValueType.Coordinate) {
+        fieldValues[currentFieldValueIndex] = deviceClickedAt
         clickUtilised=deviceClickedAt
     }
 
@@ -104,7 +109,7 @@ fun ConfigureCommandCard(
                     .padding(horizontal = 20.dp, vertical = 18.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                if (commandNode.requires.isEmpty()) {
+                if (commandNode.requiredData.isEmpty()) {
                     Text(
                         text = "This command does not require any additional configuration.",
                         color = TextSecondary,
@@ -119,18 +124,33 @@ fun ConfigureCommandCard(
                         lineHeight = 20.sp
                     )
 
-                    commandNode.requires.forEachIndexed { index, field ->
+                    commandNode.requiredData.forEachIndexed { index, field ->
                         OutlinedTextField(
-                            value = fieldValues[index],
-                            onValueChange = { fieldValues[index] = it },
+                            value = fieldValues[index].toString(),
+                            onValueChange = {
+                                fieldValues[index] = when(commandNode.requiredData[index].type) {
+                                    CommandNode.NodeData.ValueType.Input -> it
+                                    CommandNode.NodeData.ValueType.Coordinate -> {
+                                        try {
+                                            val parts = it.replace(Regex("[()]"), "").split(",")
+                                            Pair(
+                                                parts[0].trim().toInt(),
+                                                parts[1].trim().toInt()
+                                            )
+                                        } catch (e: Exception) {
+                                            fieldValues[index] // Retain the previous value
+                                        }
+                                    }
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth().onFocusChanged{
-                                currentFieldValueIndex = index
+                                if(it.isFocused) currentFieldValueIndex = index
                             },
                             label = {
-                                Text(text = field)
+                                Text(text = field.name)
                             },
                             placeholder = {
-                                Text(text = "Enter $field")
+                                Text(text = "Enter ${field.name}")
                             },
                             singleLine = true,
                             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -151,6 +171,20 @@ fun ConfigureCommandCard(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val onSendToDevice = {
+                        if(fieldValues.size == commandNode.requiredData.size) {
+                            onRun.invoke(fieldValues)
+                        }
+                    }
+                    TextButton(onClick = onSendToDevice ) {
+                        Text(
+                            text = "Run",
+                            color = PrimaryDark,
+                            fontWeight = FontWeight.Light
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(30.dp))
+
                     TextButton(onClick = onCancel) {
                         Text(
                             text = "Cancel",
@@ -162,8 +196,8 @@ fun ConfigureCommandCard(
 
                     Button(
                         onClick = {
-                            commandNode.values.clear()
-                            commandNode.values.addAll(fieldValues)
+                            commandNode.nodeData.clear()
+                            commandNode.nodeData.addAll(fieldValues)
                             onSave()
                         },
                         enabled = canSave,

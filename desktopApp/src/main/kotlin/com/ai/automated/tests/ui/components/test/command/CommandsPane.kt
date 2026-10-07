@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ai.automated.tests.cases.TestCase
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
-import com.ai.automated.tests.util.test.CommandNode
+import com.ai.automated.tests.util.test.node.CommandNode
 import kotlin.collections.forEach
 
 @Composable
@@ -83,6 +83,9 @@ fun RowScope.CommandsPane(
                         onSave = {
                             configureNode = null
                         },
+                        onRun = {
+                            nodeBeingConfigured.send(it)
+                        }
                     )
                 } else {
                     Column(
@@ -98,6 +101,7 @@ fun RowScope.CommandsPane(
                                 },
                                 onRun = {
                                     // Command execution behavior will be added separately.
+                                    command.send(command.nodeData)
                                 },
                                 onRemove = {
                                     commandNodes.removeAt(index)
@@ -142,9 +146,7 @@ fun RowScope.CommandsPane(
                     AvailableCommandCard(
                         command = command,
                         onAdd = {
-                            val newCommand = command.copy(
-                                values = command.values.toMutableList()
-                            )
+                            val newCommand = command.clone()
                             commandNodes.add(newCommand)
                             test.commandNodes.add(newCommand)
                         }

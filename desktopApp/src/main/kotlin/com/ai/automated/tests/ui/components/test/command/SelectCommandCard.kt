@@ -30,7 +30,7 @@ import com.ai.automated.tests.ui.theme.Theme.Companion.Primary
 import com.ai.automated.tests.ui.theme.Theme.Companion.PrimaryContainer
 import com.ai.automated.tests.ui.theme.Theme.Companion.PrimaryDark
 import com.ai.automated.tests.ui.theme.Theme.Companion.Surface
-import com.ai.automated.tests.util.test.CommandNode
+import com.ai.automated.tests.util.test.node.CommandNode
 
 @Composable
 fun SelectedCommandCard(
@@ -87,7 +87,7 @@ fun SelectedCommandCard(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if(command.configurable) {
+            if(command.isConfigurable()) {
                 AppButton(
                     text = "Configure",
                     onClick = onConfigure,
@@ -95,14 +95,15 @@ fun SelectedCommandCard(
                     contentColor = PrimaryDark
                 )
             }
-
-            AppButton(
-                text = "Run",
-                onClick = onRun,
-                backgroundColor = Primary,
-                contentColor = Color.White,
-                enabled = (command.configurable && command.values.isNotEmpty()) || !command.configurable,
-            )
+            if(command.requiredData.size==command.nodeData.size) {
+                AppButton(
+                    text = "Run",
+                    onClick = onRun,
+                    backgroundColor = Primary,
+                    contentColor = Color.White,
+                    enabled = (command.isConfigurable() && command.nodeData.isNotEmpty()) || !command.isConfigurable(),
+                )
+            }
 
             AppButton(
                 text = "Remove",

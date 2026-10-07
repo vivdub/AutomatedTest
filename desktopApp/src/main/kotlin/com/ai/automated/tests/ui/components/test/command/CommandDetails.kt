@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.sp
 import com.ai.automated.tests.ui.theme.Theme.Companion.AppBackground
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextPrimary
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
-import com.ai.automated.tests.util.test.CommandNode
+import com.ai.automated.tests.util.test.node.CommandNode
 
 @Composable
 fun CommandDetails(
@@ -72,11 +72,11 @@ fun CommandDetails(
             maxLines = 2
         )
 
-        if (command.values.isNotEmpty()) {
+        if (command.nodeData.isNotEmpty()) {
             Spacer(modifier = Modifier.height(5.dp))
 
             BasicText(
-                text = "Values: ${command.values.joinToString()}",
+                text = "Values: ${command.nodeData.joinToString()}",
                 style = TextStyle(
                     color = TextSecondary.copy(alpha = 0.85f),
                     fontSize = 12.sp

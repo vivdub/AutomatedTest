@@ -1,20 +1,9 @@
 package com.ai.automated.tests.ui.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,33 +11,21 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.ai.automated.tests.cases.TestCase
 import com.ai.automated.tests.ui.components.AppHeader
-import com.ai.automated.tests.ui.components.test.command.AvailableCommandCard
 import com.ai.automated.tests.ui.components.test.command.CommandsPane
-import com.ai.automated.tests.ui.components.test.command.ConfigureCommandCard
-import com.ai.automated.tests.ui.components.test.command.EmptyCommandSequence
-import com.ai.automated.tests.ui.components.test.command.SelectedCommandCard
 import com.ai.automated.tests.ui.theme.Theme.Companion.AppBackground
 import com.ai.automated.tests.ui.theme.Theme.Companion.Outline
 import com.ai.automated.tests.ui.theme.Theme.Companion.Primary
-import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
 import com.ai.automated.tests.util.helper.AdbHelper
-import com.ai.automated.tests.util.test.CommandNode
+import com.ai.automated.tests.util.test.node.CommandNode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.jetbrains.skia.Point
 import java.lang.Thread.sleep
 
 @Composable
@@ -92,7 +69,10 @@ fun TestCommandNodesScreen(test: TestCase, onBack: () -> Unit) {
                         else -> job?.cancel()
                     }
                 },
-                onDeviceClick = { x,y -> deviceClickAt = Pair(x,y) },
+                onDeviceClick = { x,y ->
+                    deviceClickAt = Pair(x,y)
+                    AdbHelper.click(x,y)
+                                },
                 bitmap = deviceScreen
             )
         }

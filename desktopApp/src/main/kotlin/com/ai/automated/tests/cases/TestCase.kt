@@ -1,6 +1,6 @@
 package com.ai.automated.tests.cases
 
-import com.ai.automated.tests.util.test.CommandNode
+import com.ai.automated.tests.util.test.node.CommandNode
 import java.util.UUID
 
 data class TestCase(
