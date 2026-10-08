@@ -196,8 +196,7 @@ fun ConfigureCommandCard(commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>
 
                     Button(
                         onClick = {
-                            commandNode.nodeData.clear()
-                            commandNode.nodeData.addAll(fieldValues)
+                            commandNode.setData(fieldValues)
                             onSave()
                         },
                         enabled = canSave,

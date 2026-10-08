@@ -52,31 +52,33 @@ open class CommandNode (val code:String, @Transient val title:String, @Transient
     fun configureNodeData(data: List<NodeData>) {this.requiredData=data}
 
     //-----
-    open fun send(values: List<Any>){
+    fun setData(values: List<Any>){
         nodeData.clear()
         nodeData.addAll(values)
     }
 
+    //-----
+    open fun run() {}
 
 
 
     //-----
     class SwipeUp: CommandNode("swipe_up","Swipe Up","Use this to trigger swipe up action on the screen"){
-        override fun send(values: List<Any>) { AdbHelper.swipeUp() }
+        override fun run() { AdbHelper.swipeUp() }
     }
 
     //-----
     class SwipeDown: CommandNode("swipe_down","Swipe Down","Use this to trigger swipe down action on the screen"){
-        override fun send(values: List<Any>) {AdbHelper.swipeDown()}
+        override fun run() {AdbHelper.swipeDown()}
     }
 
     //-----
     class SwipeLeft: CommandNode("swipe_left","Swipe Left","Use this to trigger left swipe on the screen"){
-        override fun send(values: List<Any>) { AdbHelper.swipeLeft() }
+        override fun run() { AdbHelper.swipeLeft() }
     }
 
     //-----
     class SwipeRight: CommandNode("swipe_right","Swipe Right","Use this to trigger right swipe on the screen"){
-        override fun send(values: List<Any>) { AdbHelper.swipeRight() }
+        override fun run() { AdbHelper.swipeRight() }
     }
 }

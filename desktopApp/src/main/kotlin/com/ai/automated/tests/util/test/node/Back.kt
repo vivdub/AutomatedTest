@@ -6,7 +6,7 @@ import com.ai.automated.tests.util.helper.AdbHelper
 class Back: CommandNode("back","Back","Use this to trigger back button"){
 
     //-----
-    override fun send(values: List<Any>) {
+    override fun run() {
         AdbHelper.goBack()
     }
 }

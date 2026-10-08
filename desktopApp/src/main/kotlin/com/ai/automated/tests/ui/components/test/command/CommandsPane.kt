@@ -84,7 +84,8 @@ fun RowScope.CommandsPane(
                             configureNode = null
                         },
                         onRun = {
-                            nodeBeingConfigured.send(it)
+                            nodeBeingConfigured.setData(it)
+                            nodeBeingConfigured.run()
                         }
                     )
                 } else {
@@ -101,7 +102,7 @@ fun RowScope.CommandsPane(
                                 },
                                 onRun = {
                                     // Command execution behavior will be added separately.
-                                    command.send(command.nodeData)
+                                    command.run()
                                 },
                                 onRemove = {
                                     commandNodes.removeAt(index)

@@ -11,9 +11,8 @@ class Click: CommandNode("click","Click","Use this to trigger click on an elemen
     }
     override var configurable: Boolean = true
     //-----
-    override fun send(values: List<Any>) {
-        super.send(values)
-        values.firstOrNull()?.let {value ->
+    override fun run() {
+        nodeData.firstOrNull()?.let {value ->
             (value as Pair<*, *>).apply {
                 val x = this.first as Int
                 val y = this.second as Int
