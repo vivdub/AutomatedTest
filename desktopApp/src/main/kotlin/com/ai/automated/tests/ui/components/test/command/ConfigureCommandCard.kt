@@ -37,6 +37,7 @@ import com.ai.automated.tests.ui.theme.Theme.Companion.PrimaryDark
 import com.ai.automated.tests.ui.theme.Theme.Companion.Surface
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextPrimary
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
+import com.ai.automated.tests.util.test.node.properties.CanReceiveDataFromPrevNode
 import com.ai.automated.tests.util.test.node.CommandNode
 
 @Composable
@@ -117,53 +118,62 @@ fun ConfigureCommandCard(commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>
                         lineHeight = 20.sp
                     )
                 } else {
-                    Text(
-                        text = "Enter the required values for this command.",
-                        color = TextSecondary,
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp
-                    )
-
-                    commandNode.requiredData.forEachIndexed { index, field ->
-                        OutlinedTextField(
-                            value = fieldValues[index].toString(),
-                            onValueChange = {
-                                fieldValues[index] = when(commandNode.requiredData[index].type) {
-                                    CommandNode.NodeData.ValueType.Input -> it
-                                    CommandNode.NodeData.ValueType.Coordinate -> {
-                                        try {
-                                            val parts = it.replace(Regex("[()]"), "").split(",")
-                                            Pair(
-                                                parts[0].trim().toInt(),
-                                                parts[1].trim().toInt()
-                                            )
-                                        } catch (e: Exception) {
-                                            fieldValues[index] // Retain the previous value
-                                        }
-                                    }
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth().onFocusChanged{
-                                if(it.isFocused) currentFieldValueIndex = index
-                            },
-                            label = {
-                                Text(text = field.name)
-                            },
-                            placeholder = {
-                                Text(text = "Enter ${field.name}")
-                            },
-                            singleLine = true,
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = Primary,
-                                unfocusedBorderColor = Outline,
-                                focusedLabelColor = Primary,
-                                unfocusedLabelColor = TextSecondary,
-                                textColor = TextPrimary,
-                                cursorColor = Primary,
-                                backgroundColor = Surface
-                            )
+                    when(commandNode is CanReceiveDataFromPrevNode){
+                        true ->Text(
+                            text = "This command receives the data from the previous node.",
+                            color = TextSecondary,
+                            fontSize = 14.sp,
+                            lineHeight = 20.sp
                         )
-                    }
+                        else -> {
+                            Text(
+                                text = "Enter the required values for this command.",
+                                color = TextSecondary,
+                                fontSize = 14.sp,
+                                lineHeight = 20.sp
+                            )
+                            commandNode.requiredData.forEachIndexed { index, field ->
+                                OutlinedTextField(
+                                    value = fieldValues[index].toString(),
+                                    onValueChange = {
+                                        fieldValues[index] = when(commandNode.requiredData[index].type) {
+                                            CommandNode.NodeData.ValueType.Input -> it
+                                            CommandNode.NodeData.ValueType.Coordinate -> {
+                                                try {
+                                                    val parts = it.replace(Regex("[()]"), "").split(",")
+                                                    Pair(
+                                                        parts[0].trim().toInt(),
+                                                        parts[1].trim().toInt()
+                                                    )
+                                                } catch (e: Exception) {
+                                                    fieldValues[index] // Retain the previous value
+                                                }
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth().onFocusChanged{
+                                        if(it.isFocused) currentFieldValueIndex = index
+                                    },
+                                    label = {
+                                        Text(text = field.name)
+                                    },
+                                    placeholder = {
+                                        Text(text = "Enter ${field.name}")
+                                    },
+                                    singleLine = true,
+                                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                                        focusedBorderColor = Primary,
+                                        unfocusedBorderColor = Outline,
+                                        focusedLabelColor = Primary,
+                                        unfocusedLabelColor = TextSecondary,
+                                        textColor = TextPrimary,
+                                        cursorColor = Primary,
+                                        backgroundColor = Surface
+                                    )
+                                )
+                            }
+                        } // end of else
+                    }// end of when
                 }
 
                 Row(

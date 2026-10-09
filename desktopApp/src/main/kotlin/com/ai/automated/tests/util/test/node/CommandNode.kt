@@ -8,7 +8,6 @@ open class CommandNode (val code:String, @Transient val title:String, @Transient
     @Transient var requiredData: List<NodeData> = listOf()
     @Transient
     open var configurable = false
-
     var nodeData: MutableList<Any> = mutableListOf()
 
     companion object{
@@ -20,13 +19,16 @@ open class CommandNode (val code:String, @Transient val title:String, @Transient
         val SwipeLeft = SwipeLeft()
         val SwipeRight = SwipeRight()
         val SwipeCustom = CustomSwipe()
+        val FindElement = FindElement()
 
         //--
-        fun all() = listOf(Click, Back, Input, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, SwipeCustom, SwipeCustom)
+        fun all() = listOf(Click, Back, Input, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, SwipeCustom, SwipeCustom,
+            FindElement
+        )
     }
 
     //-----
-    fun clone(): CommandNode{
+    open fun clone(): CommandNode{
         val node = when (this) {
             is Click -> Click()
             is Back -> Back()
@@ -36,9 +38,11 @@ open class CommandNode (val code:String, @Transient val title:String, @Transient
             is SwipeLeft -> SwipeLeft()
             is SwipeRight -> SwipeRight()
             is CustomSwipe -> CustomSwipe()
+            is FindElement -> FindElement()
             else -> CommandNode(code, title, description)
         }
         node.nodeData.addAll(nodeData)
+        node.requiredData = requiredData
         node.configurable = configurable
         return node
     }
@@ -80,5 +84,10 @@ open class CommandNode (val code:String, @Transient val title:String, @Transient
     //-----
     class SwipeRight: CommandNode("swipe_right","Swipe Right","Use this to trigger right swipe on the screen"){
         override fun run() { AdbHelper.swipeRight() }
+    }
+
+    //-----
+    class CaptureScreen: CommandNode("capture_screen","Capture Screen","Capture current screen"){
+        override fun run() { AdbHelper.dump() }
     }
 }

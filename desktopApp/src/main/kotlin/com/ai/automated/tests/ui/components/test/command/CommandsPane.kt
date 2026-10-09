@@ -26,7 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ai.automated.tests.cases.TestCase
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
+import com.ai.automated.tests.util.test.node.properties.CanReceiveDataFromPrevNode
 import com.ai.automated.tests.util.test.node.CommandNode
+import com.ai.automated.tests.util.test.node.properties.OutputsData
 import kotlin.collections.forEach
 
 @Composable
@@ -148,6 +150,10 @@ fun RowScope.CommandsPane(
                         command = command,
                         onAdd = {
                             val newCommand = command.clone()
+                            if(commandNodes.isNotEmpty() && commandNodes.last() is OutputsData && newCommand is CanReceiveDataFromPrevNode) {
+                                newCommand.setReceivingPrevNodeData(true)
+                                newCommand.configurable = false
+                            }
                             commandNodes.add(newCommand)
                             test.commandNodes.add(newCommand)
                         }
