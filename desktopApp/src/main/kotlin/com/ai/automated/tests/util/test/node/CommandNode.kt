@@ -4,7 +4,7 @@ import com.ai.automated.tests.util.helper.AdbHelper
 
 /** This class provides a way to store the operations */
 open class CommandNode (val code:String, @Transient val title:String, @Transient val description:String) {
-
+    @Transient val id = System.currentTimeMillis()
     @Transient var requiredData: List<NodeData> = listOf()
     @Transient
     open var configurable = false
@@ -20,10 +20,11 @@ open class CommandNode (val code:String, @Transient val title:String, @Transient
         val SwipeRight = SwipeRight()
         val SwipeCustom = CustomSwipe()
         val FindElement = FindElement()
+        val Wait = Wait()
 
         //--
         fun all() = listOf(Click, Back, Input, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, SwipeCustom, SwipeCustom,
-            FindElement
+            FindElement, Wait
         )
     }
 
@@ -39,6 +40,7 @@ open class CommandNode (val code:String, @Transient val title:String, @Transient
             is SwipeRight -> SwipeRight()
             is CustomSwipe -> CustomSwipe()
             is FindElement -> FindElement()
+            is Wait -> Wait()
             else -> CommandNode(code, title, description)
         }
         node.nodeData.addAll(nodeData)

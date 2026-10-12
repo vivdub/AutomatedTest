@@ -36,6 +36,7 @@ import com.ai.automated.tests.util.test.node.CommandNode
 fun SelectedCommandCard(
     position: Int,
     command: CommandNode,
+    running: Boolean,
     onConfigure: () -> Unit,
     onRun: () -> Unit,
     onRemove: () -> Unit
@@ -48,7 +49,7 @@ fun SelectedCommandCard(
                 shape = RoundedCornerShape(14.dp)
             )
             .clip(RoundedCornerShape(14.dp))
-            .background(Surface)
+            .background(if(running)Color.LightGray else Surface)
             .border(
                 width = 1.dp,
                 color = Outline.copy(alpha = 0.55f),

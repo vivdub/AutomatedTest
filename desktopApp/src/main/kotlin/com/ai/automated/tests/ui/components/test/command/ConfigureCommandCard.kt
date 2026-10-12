@@ -39,9 +39,10 @@ import com.ai.automated.tests.ui.theme.Theme.Companion.TextPrimary
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
 import com.ai.automated.tests.util.test.node.properties.CanReceiveDataFromPrevNode
 import com.ai.automated.tests.util.test.node.CommandNode
+import com.ai.automated.tests.util.test.node.properties.OutputsData
 
 @Composable
-fun ConfigureCommandCard(commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>?, onCancel: () -> Unit, onSave: () -> Unit, onRun:(List<Any>)->Unit) {
+fun ConfigureCommandCard(commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>?, refresh:Int, onCancel: () -> Unit, onSave: () -> Unit, onRun:(List<Any>)->Unit) {
 
     val fieldValues = remember(commandNode) {
         mutableStateListOf<Any>().apply {
@@ -118,7 +119,7 @@ fun ConfigureCommandCard(commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>
                         lineHeight = 20.sp
                     )
                 } else {
-                    when(commandNode is CanReceiveDataFromPrevNode){
+                    when(commandNode is CanReceiveDataFromPrevNode && commandNode.isReceivingPrevNodeData()){
                         true ->Text(
                             text = "This command receives the data from the previous node.",
                             color = TextSecondary,
@@ -171,6 +172,9 @@ fun ConfigureCommandCard(commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>
                                         backgroundColor = Surface
                                     )
                                 )
+                            }
+                            if(refresh>0 && commandNode is OutputsData){
+                                Text(commandNode.getOutputData().toString())
                             }
                         } // end of else
                     }// end of when

@@ -25,15 +25,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ai.automated.tests.cases.TestCase
+import com.ai.automated.tests.cases.TestCaseRunner
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
 import com.ai.automated.tests.util.test.node.properties.CanReceiveDataFromPrevNode
 import com.ai.automated.tests.util.test.node.CommandNode
 import com.ai.automated.tests.util.test.node.properties.OutputsData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlin.collections.forEach
 
 @Composable
 fun RowScope.CommandsPane(
     commandNodes: SnapshotStateList<CommandNode>,
+    currentRunningNode: Long,
     availableCommands: List<CommandNode>,
     test: TestCase, deviceClickedAt: Pair<Int, Int>?,
 ) {
@@ -75,10 +80,11 @@ fun RowScope.CommandsPane(
                 EmptyCommandSequence()
             } else {
                 val nodeBeingConfigured = configureNode
+                var confComRefIdentifier by remember { mutableStateOf(0) }
                 if (nodeBeingConfigured != null) {
                     ConfigureCommandCard(
                         commandNode = nodeBeingConfigured,
-                        deviceClickedAt,
+                        deviceClickedAt, confComRefIdentifier,
                         onCancel = {
                             configureNode = null
                         },
@@ -87,7 +93,10 @@ fun RowScope.CommandsPane(
                         },
                         onRun = {
                             nodeBeingConfigured.setData(it)
-                            nodeBeingConfigured.run()
+                            CoroutineScope(Dispatchers.IO).launch {
+                                nodeBeingConfigured.run()
+                                confComRefIdentifier++
+                            }
                         }
                     )
                 } else {
@@ -99,6 +108,7 @@ fun RowScope.CommandsPane(
                             SelectedCommandCard(
                                 position = index + 1,
                                 command = command,
+                                command.id==currentRunningNode,
                                 onConfigure = {
                                     configureNode = command
                                 },

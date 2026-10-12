@@ -34,4 +34,12 @@ class Click: CommandNode("click","Click","Use this to trigger click on an elemen
     //-----
     override fun isReceivingPrevNodeData(): Boolean = isReceivingDataFromPrevNode
     override fun setReceivingPrevNodeData(yes: Boolean) { isReceivingDataFromPrevNode = yes }
+
+    //-----
+    override fun setDataFromPrevNode(data: Any) {
+        if(data is Pair<*,*>){
+            nodeData.clear()
+            nodeData.add(data)
+        }
+    }
 }

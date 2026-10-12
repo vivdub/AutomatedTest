@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import com.ai.automated.tests.cases.TestCase
+import com.ai.automated.tests.cases.TestCaseRunner
 import com.ai.automated.tests.ui.components.AppHeader
 import com.ai.automated.tests.ui.components.test.command.CommandsPane
 import com.ai.automated.tests.ui.theme.Theme.Companion.AppBackground
@@ -42,6 +43,8 @@ fun TestCommandNodesScreen(test: TestCase, onBack: () -> Unit) {
     var deviceScreen by remember { mutableStateOf<ImageBitmap?>(null) }
     var job by remember { mutableStateOf<Job?>(null) }
     var deviceClickAt by remember { mutableStateOf<Pair<Int,Int>?>(null) }
+    val testCaseRunner by remember { mutableStateOf(TestCaseRunner()) }
+    var currentRunningNode by remember { mutableStateOf(0L) }
 
     LaunchedEffect(Unit) {
         job = getDeviceScreen { deviceScreen = it }
@@ -53,13 +56,15 @@ fun TestCommandNodesScreen(test: TestCase, onBack: () -> Unit) {
             title = test.title,
             subtitle = "$commandCount ${if (commandCount == 1) "command" else "commands"} in this test",
             actionText = "▶  Run all",
-            onAction = {},
+            onAction = {
+                testCaseRunner.execute(commandNodes){ currentRunningNode = it?.id?:0L }
+            },
             onBack = onBack,
             actionBackgroundColor = if (commandNodes.isNotEmpty()) Primary else Outline
         )
 
         Row(modifier = Modifier.fillMaxSize()) {
-            CommandsPane(commandNodes, availableCommands, test, deviceClickAt)
+            CommandsPane(commandNodes, currentRunningNode, availableCommands, test, deviceClickAt)
             AndroidDevicePane(
                 expanded = isDevicePaneExpanded,
                 onToggle = {

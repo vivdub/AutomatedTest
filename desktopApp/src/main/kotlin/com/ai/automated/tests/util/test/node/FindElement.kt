@@ -24,13 +24,14 @@ class FindElement: CommandNode("find_ele","Find Element","Use this to trigger sw
         val file = AdbHelper.pullDump()
         val element = parser.parseUiDump(file)
         val points = mutableListOf<Int>()
+        point = Pair(0,0)
         element.findByText(nodeData.first().toString())?.let { element ->
             element.bounds!!.substring(1, element.bounds.length - 1).split("][").forEach { bSplit ->
                 bSplit.split(",").forEach { points.add(it.trim().toInt()) }
             }
         }
-        point = Pair((points[0]+points[2])/2, (points[1]+points[3])/2)
-        println("foundt at: $point")
+        if(points.isNotEmpty())
+            point = Pair((points[0]+points[2])/2, (points[1]+points[3])/2)
     }
 
     //-----
