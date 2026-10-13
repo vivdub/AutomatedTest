@@ -90,7 +90,7 @@ fun CommandDetails(
                     maxLines = 1
                 )
 
-                if (command is VerifyingNode && refreshCounter > 0) {
+                if (command is VerifyingNode && refreshCounter > 0 && command.isVerified()) {
                     Spacer(modifier = Modifier.width(20.dp))
 
                     Box(

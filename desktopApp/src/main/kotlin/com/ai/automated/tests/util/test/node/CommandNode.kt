@@ -1,6 +1,7 @@
 package com.ai.automated.tests.util.test.node
 
 import com.ai.automated.tests.util.helper.AdbHelper
+import com.ai.automated.tests.util.test.node.properties.VerifyingNode
 
 /** This class provides a way to store the operations */
 open class CommandNode (val code:String, @Transient val title:String, @Transient val description:String) {
@@ -21,10 +22,11 @@ open class CommandNode (val code:String, @Transient val title:String, @Transient
         val SwipeCustom = CustomSwipe()
         val FindElement = FindElement()
         val Wait = Wait()
+        val VerifyElementExistence = VerifyElementExistence()
 
         //--
         fun all() = listOf(Click, Back, Input, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, SwipeCustom, SwipeCustom,
-            FindElement, Wait
+            FindElement, Wait, VerifyElementExistence
         )
     }
 
@@ -41,6 +43,7 @@ open class CommandNode (val code:String, @Transient val title:String, @Transient
             is CustomSwipe -> CustomSwipe()
             is FindElement -> FindElement()
             is Wait -> Wait()
+            is VerifyElementExistence -> VerifyElementExistence()
             else -> CommandNode(code, title, description)
         }
         node.nodeData.addAll(nodeData)

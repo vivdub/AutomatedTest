@@ -67,7 +67,7 @@ fun AvailableCommandCard(
 
         Spacer(modifier = Modifier.width(14.dp))
 
-        CommandDetails(
+        CommandDetails(0,
             command = command,
             modifier = Modifier.weight(1f)
         )

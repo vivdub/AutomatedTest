@@ -13,6 +13,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,6 +35,7 @@ import com.ai.automated.tests.ui.theme.Theme.Companion.PrimaryContainer
 import com.ai.automated.tests.ui.theme.Theme.Companion.PrimaryDark
 import com.ai.automated.tests.ui.theme.Theme.Companion.Surface
 import com.ai.automated.tests.util.test.node.CommandNode
+import com.ai.automated.tests.util.test.node.properties.VerifyingNode
 
 @Composable
 fun SelectedCommandCard(
@@ -41,6 +46,13 @@ fun SelectedCommandCard(
     onRun: () -> Unit,
     onRemove: () -> Unit
 ) {
+    var refresh by remember { mutableStateOf(1) }
+    var prevRunning by remember { mutableStateOf(false) }
+    if(prevRunning!=running){
+        refresh++
+        prevRunning = running
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -76,8 +88,8 @@ fun SelectedCommandCard(
         }
 
         Spacer(modifier = Modifier.width(14.dp))
-
         CommandDetails(
+            refresh,
             command = command,
             modifier = Modifier.weight(1f)
         )
