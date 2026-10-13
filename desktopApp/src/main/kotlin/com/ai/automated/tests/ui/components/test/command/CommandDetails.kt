@@ -19,14 +19,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ai.automated.tests.ui.theme.Theme.Companion.AppBackground
+import com.ai.automated.tests.ui.theme.Theme.Companion.SuccessText
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextPrimary
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
 import com.ai.automated.tests.util.test.node.CommandNode
+import com.ai.automated.tests.util.test.node.properties.VerifyingNode
 
 @Composable
-fun CommandDetails(
-    command: CommandNode,
-    modifier: Modifier = Modifier
+fun CommandDetails(refreshCounter: Int,
+                   command: CommandNode,
+                   modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         Row(
@@ -75,14 +77,26 @@ fun CommandDetails(
         if (command.nodeData.isNotEmpty()) {
             Spacer(modifier = Modifier.height(5.dp))
 
-            BasicText(
-                text = "Values: ${command.nodeData.joinToString()}",
-                style = TextStyle(
-                    color = TextSecondary.copy(alpha = 0.85f),
-                    fontSize = 12.sp
-                ),
-                maxLines = 1
-            )
+            Row {
+                BasicText(
+                    text = "Values: ${command.nodeData.joinToString()}",
+                    style = TextStyle(
+                        color = TextSecondary.copy(alpha = 0.85f),
+                        fontSize = 12.sp
+                    ),
+                    maxLines = 1
+                )
+                if (command is VerifyingNode && refreshCounter > 0) {
+                    Spacer(modifier = Modifier.width(20.dp))
+                    BasicText(
+                        text = "Verified",
+                        style = TextStyle(
+                            color = SuccessText,
+                            fontSize = 10.sp
+                        ),
+                    )
+                }
+            }
         }
     }
 }
