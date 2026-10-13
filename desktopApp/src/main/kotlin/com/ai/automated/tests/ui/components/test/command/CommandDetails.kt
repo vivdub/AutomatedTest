@@ -26,9 +26,10 @@ import com.ai.automated.tests.util.test.node.CommandNode
 import com.ai.automated.tests.util.test.node.properties.VerifyingNode
 
 @Composable
-fun CommandDetails(refreshCounter: Int,
-                   command: CommandNode,
-                   modifier: Modifier = Modifier
+fun CommandDetails(
+    refreshCounter: Int,
+    command: CommandNode,
+    modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         Row(
@@ -77,7 +78,9 @@ fun CommandDetails(refreshCounter: Int,
         if (command.nodeData.isNotEmpty()) {
             Spacer(modifier = Modifier.height(5.dp))
 
-            Row {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 BasicText(
                     text = "Values: ${command.nodeData.joinToString()}",
                     style = TextStyle(
@@ -86,15 +89,25 @@ fun CommandDetails(refreshCounter: Int,
                     ),
                     maxLines = 1
                 )
+
                 if (command is VerifyingNode && refreshCounter > 0) {
                     Spacer(modifier = Modifier.width(20.dp))
-                    BasicText(
-                        text = "Verified",
-                        style = TextStyle(
-                            color = SuccessText,
-                            fontSize = 10.sp
-                        ),
-                    )
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(SuccessText.copy(alpha = 0.12f))
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                    ) {
+                        BasicText(
+                            text = "Verified",
+                            style = TextStyle(
+                                color = SuccessText,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        )
+                    }
                 }
             }
         }
