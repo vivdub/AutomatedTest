@@ -2,6 +2,7 @@ package com.ai.automated.tests.ui.components.test.command
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -36,7 +37,7 @@ import kotlinx.coroutines.launch
 import kotlin.collections.forEach
 
 @Composable
-fun RowScope.CommandsPane(
+fun ColumnScope.CommandsPane(
     commandNodes: SnapshotStateList<CommandNode>,
     currentRunningNode: Long,
     availableCommands: List<CommandNode>,

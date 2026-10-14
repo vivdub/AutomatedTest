@@ -18,6 +18,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ai.automated.tests.ui.components.Chip
 import com.ai.automated.tests.ui.theme.Theme.Companion.AppBackground
 import com.ai.automated.tests.ui.theme.Theme.Companion.SuccessText
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextPrimary
@@ -93,12 +94,7 @@ fun CommandDetails(
                 if (command is VerifyingNode && refreshCounter > 0 && command.isVerified()) {
                     Spacer(modifier = Modifier.width(20.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(SuccessText.copy(alpha = 0.12f))
-                            .padding(horizontal = 8.dp, vertical = 3.dp)
-                    ) {
+                    Chip(SuccessText.copy(alpha = 0.12f)){
                         BasicText(
                             text = "Verified",
                             style = TextStyle(
