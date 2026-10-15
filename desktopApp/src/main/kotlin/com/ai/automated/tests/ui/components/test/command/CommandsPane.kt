@@ -1,6 +1,8 @@
 package com.ai.automated.tests.ui.components.test.command
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
@@ -21,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,6 +34,7 @@ import com.ai.automated.tests.cases.TestCaseRunner
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
 import com.ai.automated.tests.util.test.node.properties.CanReceiveDataFromPrevNode
 import com.ai.automated.tests.util.test.node.CommandNode
+import com.ai.automated.tests.util.test.node.VerifyTheArea
 import com.ai.automated.tests.util.test.node.properties.OutputsData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +46,9 @@ fun ColumnScope.CommandsPane(
     commandNodes: SnapshotStateList<CommandNode>,
     currentRunningNode: Long,
     availableCommands: List<CommandNode>,
-    test: TestCase, deviceClickedAt: Pair<Int, Int>?,
+    test: TestCase,
+    deviceClickedAt: Pair<Int, Int>?,
+    onOverlayGeneration: (@Composable ()->Unit) -> Unit,
 ) {
     var configureNode by remember { mutableStateOf<CommandNode?>(null) }
 
@@ -97,6 +104,17 @@ fun ColumnScope.CommandsPane(
                             CoroutineScope(Dispatchers.IO).launch {
                                 nodeBeingConfigured.run()
                                 confComRefIdentifier++
+                            }
+                        },
+                        onCommandConfiguration = {commandNode ->
+                            if(commandNode is VerifyTheArea && commandNode.nodeData.size==2){
+                                try {
+                                    val size = commandNode.nodeData[1].toString().toInt()
+                                    val box: @Composable () -> Unit = {
+                                        Box(modifier = Modifier.width(size.dp).height(size.dp).background(Color.Blue)) {}
+                                    }
+                                    onOverlayGeneration.invoke(box)
+                                }catch (e: Exception){}
                             }
                         }
                     )

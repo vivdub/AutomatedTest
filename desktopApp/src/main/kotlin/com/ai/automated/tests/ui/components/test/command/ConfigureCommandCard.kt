@@ -42,7 +42,7 @@ import com.ai.automated.tests.util.test.node.CommandNode
 import com.ai.automated.tests.util.test.node.properties.OutputsData
 
 @Composable
-fun ConfigureCommandCard(commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>?, refresh:Int, onCancel: () -> Unit, onSave: () -> Unit, onRun:(List<Any>)->Unit) {
+fun ConfigureCommandCard(commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>?, refresh:Int, onCommandConfiguration:(CommandNode)->Unit, onCancel: () -> Unit, onSave: () -> Unit, onRun:(List<Any>)->Unit) {
 
     val fieldValues = remember(commandNode) {
         mutableStateListOf<Any>().apply {
@@ -151,6 +151,7 @@ fun ConfigureCommandCard(commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>
                                                 }
                                             }
                                         }
+                                        onCommandConfiguration.invoke(commandNode)
                                     },
                                     modifier = Modifier.fillMaxWidth().onFocusChanged{
                                         if(it.isFocused) currentFieldValueIndex = index

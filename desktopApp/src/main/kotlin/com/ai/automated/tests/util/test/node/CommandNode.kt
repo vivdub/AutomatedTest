@@ -23,10 +23,11 @@ open class CommandNode (val code:String, @Transient val title:String, @Transient
         val FindElement = FindElement()
         val Wait = Wait()
         val VerifyElementExistence = VerifyElementExistence()
+        val VerifyTheArea = VerifyTheArea()
 
         //--
         fun all() = listOf(Click, Back, Input, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, SwipeCustom, SwipeCustom,
-            FindElement, Wait, VerifyElementExistence
+            FindElement, Wait, VerifyElementExistence, VerifyTheArea
         )
     }
 
@@ -44,6 +45,7 @@ open class CommandNode (val code:String, @Transient val title:String, @Transient
             is FindElement -> FindElement()
             is Wait -> Wait()
             is VerifyElementExistence -> VerifyElementExistence()
+            is VerifyTheArea -> VerifyTheArea()
             else -> CommandNode(code, title, description)
         }
         node.nodeData.addAll(nodeData)

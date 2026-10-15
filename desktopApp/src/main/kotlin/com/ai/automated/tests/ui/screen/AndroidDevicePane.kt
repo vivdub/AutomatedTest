@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -44,6 +45,7 @@ fun AndroidDevicePane(
     expanded: Boolean,
     onToggle: () -> Unit,
     bitmap: ImageBitmap? = null,
+    overlayContent: @Composable () -> Unit,
     onDeviceClick: (x: Int, y: Int) -> Unit = { _, _ -> }
 ) {
     if (expanded) {
@@ -52,6 +54,7 @@ fun AndroidDevicePane(
                 null -> WaitForImage()
                 else -> ShowImage(
                     image = bitmap,
+                    overlayContent,
                     onDeviceClick = onDeviceClick
                 )
             }
@@ -64,28 +67,30 @@ fun AndroidDevicePane(
 @Composable
 private fun ShowImage(
     image: ImageBitmap,
+    overlayContent: @Composable () -> Unit,
     onDeviceClick: (x: Int, y: Int) -> Unit
 ) {
-    Image(
-        bitmap = image,
-        contentDescription = "Android screen",
-        contentScale = ContentScale.Fit,
-        modifier = Modifier
-            .aspectRatio(image.width.toFloat() / image.height)
-            .pointerInput(image) {
-                detectTapGestures { tapPosition ->
-                    val imageWidth = image.width.toFloat()
-                    val imageHeight = image.height.toFloat()
-                    val containerWidth = size.width.toFloat()
-                    val containerHeight = size.height.toFloat()
-                    val widthRatio = imageWidth / containerWidth
-                    val heightRatio = imageHeight / containerHeight
+    Box {
+        Image(
+            bitmap = image,
+            contentDescription = "Android screen",
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .aspectRatio(image.width.toFloat() / image.height)
+                .pointerInput(image) {
+                    detectTapGestures { tapPosition ->
+                        val imageWidth = image.width.toFloat()
+                        val imageHeight = image.height.toFloat()
+                        val containerWidth = size.width.toFloat()
+                        val containerHeight = size.height.toFloat()
+                        val widthRatio = imageWidth / containerWidth
+                        val heightRatio = imageHeight / containerHeight
 
-                    val devicePoxX = (tapPosition.x * widthRatio).roundToInt()
-                    val devicePoxY = (tapPosition.y * heightRatio).roundToInt()
+                        val devicePoxX = (tapPosition.x * widthRatio).roundToInt()
+                        val devicePoxY = (tapPosition.y * heightRatio).roundToInt()
 
-                    onDeviceClick.invoke(devicePoxX, devicePoxY)
-                    /*if (
+                        onDeviceClick.invoke(devicePoxX, devicePoxY)
+                        /*if (
                         imageWidth <= 0f ||
                         imageHeight <= 0f ||
                         containerWidth <= 0f ||
@@ -121,9 +126,11 @@ private fun ShowImage(
                         .coerceIn(0, image.height - 1)
 
                     onDeviceClick(deviceX, deviceY)*/
+                    }
                 }
-            }
-    )
+        )
+        overlayContent()
+    }
 }
 
 @Composable

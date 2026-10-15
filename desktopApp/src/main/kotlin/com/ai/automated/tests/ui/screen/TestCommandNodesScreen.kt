@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,6 +57,8 @@ fun TestCommandNodesScreen(test: TestCase, onBack: () -> Unit) {
     val testCaseRunner by remember { mutableStateOf(TestCaseRunner()) }
     var currentRunningNode by remember { mutableStateOf(0L) }
 
+    var overlayContent by remember { mutableStateOf<@Composable () -> Unit>({}) }
+
     LaunchedEffect(Unit) {
         job = getDeviceScreen { deviceScreen = it }
     }
@@ -79,7 +83,10 @@ fun TestCommandNodesScreen(test: TestCase, onBack: () -> Unit) {
                         }
                     }
                 }
-                CommandsPane(commandNodes, currentRunningNode, availableCommands, test, deviceClickAt)
+                val onOverlayGeneration:(@Composable ()->Unit)->Unit = {
+                    overlayContent = it
+                }
+                CommandsPane(commandNodes, currentRunningNode, availableCommands, test,deviceClickAt, onOverlayGeneration)
             }
             AndroidDevicePane(
                 expanded = isDevicePaneExpanded,
@@ -94,7 +101,8 @@ fun TestCommandNodesScreen(test: TestCase, onBack: () -> Unit) {
                     deviceClickAt = Pair(x,y)
                     AdbHelper.click(x,y)
                                 },
-                bitmap = deviceScreen
+                bitmap = deviceScreen,
+                overlayContent = overlayContent
             )
         }
     }
