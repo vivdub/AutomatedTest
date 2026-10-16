@@ -19,6 +19,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,7 +43,7 @@ import com.ai.automated.tests.util.test.node.CommandNode
 import com.ai.automated.tests.util.test.node.properties.OutputsData
 
 @Composable
-fun ConfigureCommandCard(commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>?, refresh:Int, onCommandConfiguration:(CommandNode)->Unit, onCancel: () -> Unit, onSave: () -> Unit, onRun:(List<Any>)->Unit) {
+fun ConfigureCommandCard(commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>?, refresh:Int, onCommandConfiguration:(CommandNode?, List<Any>)->Unit, onCancel: () -> Unit, onSave: () -> Unit, onRun:(List<Any>)->Unit) {
 
     val fieldValues = remember(commandNode) {
         mutableStateListOf<Any>().apply {
@@ -151,7 +152,7 @@ fun ConfigureCommandCard(commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>
                                                 }
                                             }
                                         }
-                                        onCommandConfiguration.invoke(commandNode)
+                                        onCommandConfiguration.invoke(commandNode, fieldValues)
                                     },
                                     modifier = Modifier.fillMaxWidth().onFocusChanged{
                                         if(it.isFocused) currentFieldValueIndex = index
@@ -231,5 +232,9 @@ fun ConfigureCommandCard(commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>
                 }
             }
         }
+    }
+
+    DisposableEffect(Unit){
+        onDispose {onCommandConfiguration.invoke(null, listOf())}
     }
 }

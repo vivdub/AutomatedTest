@@ -70,7 +70,7 @@ private fun ShowImage(
     overlayContent: @Composable () -> Unit,
     onDeviceClick: (x: Int, y: Int) -> Unit
 ) {
-    Box {
+    Box(modifier = Modifier.aspectRatio(image.width.toFloat() / image.height)) {
         Image(
             bitmap = image,
             contentDescription = "Android screen",

@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ai.automated.tests.cases.TestCase
 import com.ai.automated.tests.cases.TestCaseRunner
+import com.ai.automated.tests.ui.components.configuration.BoundedAreaPicker
 import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
 import com.ai.automated.tests.util.test.node.properties.CanReceiveDataFromPrevNode
 import com.ai.automated.tests.util.test.node.CommandNode
@@ -41,6 +43,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.collections.forEach
 
+//-------
 @Composable
 fun ColumnScope.CommandsPane(
     commandNodes: SnapshotStateList<CommandNode>,
@@ -106,15 +109,13 @@ fun ColumnScope.CommandsPane(
                                 confComRefIdentifier++
                             }
                         },
-                        onCommandConfiguration = {commandNode ->
-                            if(commandNode is VerifyTheArea && commandNode.nodeData.size==2){
-                                try {
-                                    val size = commandNode.nodeData[1].toString().toInt()
-                                    val box: @Composable () -> Unit = {
-                                        Box(modifier = Modifier.width(size.dp).height(size.dp).background(Color.Blue)) {}
-                                    }
-                                    onOverlayGeneration.invoke(box)
-                                }catch (e: Exception){}
+                        onCommandConfiguration = {commandNode, values ->
+                            if(commandNode==null) {
+                                onOverlayGeneration.invoke {  }
+                                return@ConfigureCommandCard
+                            }
+                            if(commandNode is VerifyTheArea && values.size==2){
+                                onOverlayGeneration.invoke({ShowBoundedArea(commandNode, values)})
                             }
                         }
                     )
@@ -193,4 +194,15 @@ fun ColumnScope.CommandsPane(
             Spacer(modifier = Modifier.height(28.dp))
         }
     }
+}
+
+//-------
+@Composable
+private fun ShowBoundedArea(commandNode: CommandNode, values: List<Any>) {
+    var width = 0
+    val coordinates = values[0] as Pair<*, *>
+    try {
+        width = values[1].toString().toInt()
+    }catch (e:Exception){}
+    BoundedAreaPicker(coordinates.first.toString().toInt(), coordinates.second.toString().toInt(), width)
 }
