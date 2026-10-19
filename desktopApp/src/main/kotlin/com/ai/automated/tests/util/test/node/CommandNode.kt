@@ -63,7 +63,7 @@ open class CommandNode (val code:String, @Transient val title:String, @Transient
     fun configureNodeData(data: List<NodeData>) {this.requiredData=data}
 
     //-----
-    fun setData(values: List<Any>){
+    open fun setData(values: List<Any>){
         nodeData.clear()
         nodeData.addAll(values)
     }

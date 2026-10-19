@@ -114,7 +114,7 @@ fun ColumnScope.CommandsPane(
                                 onOverlayGeneration.invoke {  }
                                 return@ConfigureCommandCard
                             }
-                            if(commandNode is VerifyTheArea && values.size==2){
+                            if(commandNode is VerifyTheArea && values.size==1){
                                 onOverlayGeneration.invoke({ShowBoundedArea(commandNode, values)})
                             }
                         }
@@ -200,9 +200,17 @@ fun ColumnScope.CommandsPane(
 @Composable
 private fun ShowBoundedArea(commandNode: CommandNode, values: List<Any>) {
     var width = 0
-    val coordinates = values[0] as Pair<*, *>
     try {
-        width = values[1].toString().toInt()
+        width = values[0].toString().toInt()
     }catch (e:Exception){}
-    BoundedAreaPicker(coordinates.first.toString().toInt(), coordinates.second.toString().toInt(), width)
+    var left = 0
+    var top = 0
+    if(commandNode is VerifyTheArea){
+        left = commandNode.getLeft()
+        top = commandNode.getTop()
+    }
+    BoundedAreaPicker(left, top, width){left, top, width, containerWidth ->
+        if(commandNode is VerifyTheArea)
+            commandNode.setArea(left, top, width, containerWidth)
+    }
 }

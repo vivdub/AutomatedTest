@@ -20,6 +20,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -58,6 +59,10 @@ fun ConfigureCommandCard(commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>
                 }
             }
         }
+    }
+    LaunchedEffect(Unit){
+        if(commandNode.nodeData.isNotEmpty())
+            onCommandConfiguration.invoke(commandNode, commandNode.nodeData)
     }
     val canSave = fieldValues.size == commandNode.requiredData.size
     var currentFieldValueIndex by remember { mutableStateOf(-1) }

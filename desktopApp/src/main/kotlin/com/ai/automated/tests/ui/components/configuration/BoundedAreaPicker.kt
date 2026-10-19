@@ -25,10 +25,11 @@ import androidx.compose.ui.unit.max
 
 //----------
 @Composable
-fun BoundedAreaPicker(startPadding: Int, topPadding: Int, width: Int) {
+/** @param onBoxCredentials left, top, box width, container width */
+fun BoundedAreaPicker(start:Int=0, top:Int=0, width: Int, onBoxCredentials:(Int, Int, Int, Int)->Unit) {
 
-    var left by remember { mutableStateOf(startPadding) }
-    var top by remember { mutableStateOf(topPadding) }
+    var left by remember { mutableStateOf(start) }
+    var top by remember { mutableStateOf(top) }
 
     val minBoxWidthDP = 20.dp
     val minBoxWidthPX = with(LocalDensity.current) { minBoxWidthDP.toPx().toInt() }
@@ -36,10 +37,15 @@ fun BoundedAreaPicker(startPadding: Int, topPadding: Int, width: Int) {
     BoxWithConstraints(Modifier.fillMaxWidth()) {
 
         val availableWidth = (maxWidth - left.dp).coerceAtLeast(minBoxWidthDP)
-        val boundedWidth = width.dp.coerceIn(minBoxWidthDP, availableWidth)
 
-        val max = with(LocalDensity.current) { maxWidth.toPx().toInt() }
-        left = left.coerceIn(0, max-minBoxWidthPX)
+        val boundedWidth = width.dp.coerceIn(minBoxWidthDP, availableWidth)
+        val boundedWidthPx = with(LocalDensity.current) {boundedWidth.toPx().toInt() }
+
+        val maxWidth = with(LocalDensity.current) { maxWidth.toPx().toInt() }
+        val maxHeight = with(LocalDensity.current) { maxHeight.toPx().toInt() }
+
+        left = left.coerceIn(0, maxWidth-minBoxWidthPX)
+        top = top.coerceIn(0, maxHeight-boundedWidthPx)
 
         Box(
             modifier = Modifier
@@ -54,5 +60,6 @@ fun BoundedAreaPicker(startPadding: Int, topPadding: Int, width: Int) {
                     }
                 }
         )
+        onBoxCredentials.invoke(left, top, width, maxWidth)
     }
 }
