@@ -1,13 +1,18 @@
 package com.ai.automated.tests.util.test.node
 
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import com.ai.automated.tests.util.helper.AdbHelper
 import com.ai.automated.tests.util.test.node.properties.VerifyingNode
-import javax.swing.Spring.height
+import java.awt.image.BufferedImage
+import java.io.File
+import javax.imageio.ImageIO
 
 //--------
-class VerifyTheArea: CommandNode("verify_area", "Verify Area match", "Matches a particular section of the area taken from the image dump."), VerifyingNode {
+class VerifyTheArea : CommandNode(
+    "verify_area",
+    "Verify Area match",
+    "Matches a particular section of the area taken from the image dump."
+), VerifyingNode {
 
     override var configurable = true
     var left = 0
@@ -16,9 +21,11 @@ class VerifyTheArea: CommandNode("verify_area", "Verify Area match", "Matches a 
 
     //----
     init {
-        configureNodeData(listOf(
-            NodeData("Distance from center", NodeData.ValueType.Input)
-        ))
+        configureNodeData(
+            listOf(
+                NodeData("Distance from center", NodeData.ValueType.Input)
+            )
+        )
     }
 
     //----
@@ -29,15 +36,48 @@ class VerifyTheArea: CommandNode("verify_area", "Verify Area match", "Matches a 
     //----
     override fun setData(values: List<Any>) {
         super.setData(values)
-
     }
 
     //----
-    private fun saveTheArea(){
+    private fun saveTheArea() {
         AdbHelper.takeScreenshot()?.let { screenshot ->
-            val arr = IntArray(width * width)
-            screenshot.toComposeImageBitmap().readPixels(arr, left,  top, width, width)
-            ImageBitmap(width, width)
+            require(width > 0) {
+                "The area width must be greater than zero."
+            }
+            require(left >= 0 && top >= 0) {
+                "The area coordinates cannot be negative."
+            }
+            require(left + width <= screenshot.width && top + width <= screenshot.height) {
+                "The requested area is outside the screenshot bounds."
+            }
+
+            val pixels = IntArray(width * width)
+            screenshot.toComposeImageBitmap().readPixels(
+                buffer = pixels,
+                startX = left,
+                startY = top,
+                width = width,
+                height = width
+            )
+
+            val areaImage = BufferedImage(
+                width,
+                width,
+                BufferedImage.TYPE_INT_ARGB
+            )
+            areaImage.setRGB(
+                0,
+                0,
+                width,
+                width,
+                pixels,
+                0,
+                width
+            )
+
+            val outputFile = File("data/dump/verify_area.png")
+            outputFile.parentFile?.mkdirs()
+            ImageIO.write(areaImage, "png", outputFile)
         }
     }
 }
