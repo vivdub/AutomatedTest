@@ -61,6 +61,7 @@ fun ConfigureCommandCard(commandNode: CommandNode, deviceClickedAt:Pair<Int,Int>
         }
     }
     LaunchedEffect(Unit){
+        println("node data: ${commandNode.nodeData}")
         if(commandNode.nodeData.isNotEmpty())
             onCommandConfiguration.invoke(commandNode, commandNode.nodeData)
     }
