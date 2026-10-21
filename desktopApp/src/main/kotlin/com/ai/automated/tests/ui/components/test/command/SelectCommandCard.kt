@@ -108,6 +108,7 @@ fun SelectedCommandCard(
                     contentColor = PrimaryDark
                 )
             }
+            println("${command.title}  -  ${command.isConfigurable()}")
             if(command.requiredData.size==command.nodeData.size) {
                 AppButton(
                     text = "Run",

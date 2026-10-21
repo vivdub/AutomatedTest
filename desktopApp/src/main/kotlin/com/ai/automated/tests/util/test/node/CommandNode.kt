@@ -5,7 +5,7 @@ import com.ai.automated.tests.util.test.node.properties.VerifyingNode
 
 /** This class provides a way to store the operations */
 open class CommandNode (val code:String, @Transient val title:String, @Transient val description:String) {
-    @Transient val id = System.currentTimeMillis()
+    var id = System.currentTimeMillis()
     @Transient var requiredData: List<NodeData> = listOf()
     @Transient
     open var configurable = false
@@ -24,10 +24,11 @@ open class CommandNode (val code:String, @Transient val title:String, @Transient
         val Wait = Wait()
         val VerifyElementExistence = VerifyElementExistence()
         val VerifyTheArea = VerifyTheArea()
+        val CaptureScreen = CaptureScreen()
 
         //--
         fun all() = listOf(Click, Back, Input, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, SwipeCustom, SwipeCustom,
-            FindElement, Wait, VerifyElementExistence, VerifyTheArea
+            FindElement, Wait, VerifyElementExistence, VerifyTheArea, CaptureScreen
         )
     }
 
@@ -46,6 +47,7 @@ open class CommandNode (val code:String, @Transient val title:String, @Transient
             is Wait -> Wait()
             is VerifyElementExistence -> VerifyElementExistence()
             is VerifyTheArea -> VerifyTheArea()
+            is CaptureScreen -> CaptureScreen()
             else -> CommandNode(code, title, description)
         }
         node.nodeData.addAll(nodeData)
@@ -55,7 +57,7 @@ open class CommandNode (val code:String, @Transient val title:String, @Transient
     }
 
     //-----
-    class NodeData(var name:String, var type: ValueType){
+    class NodeData(var name:String, var type: ValueType, var optional: Boolean=false){
         enum class ValueType{ Coordinate, Input }
     }
 
@@ -91,10 +93,5 @@ open class CommandNode (val code:String, @Transient val title:String, @Transient
     //-----
     class SwipeRight: CommandNode("swipe_right","Swipe Right","Use this to trigger right swipe on the screen"){
         override fun run() { AdbHelper.swipeRight() }
-    }
-
-    //-----
-    class CaptureScreen: CommandNode("capture_screen","Capture Screen","Capture current screen"){
-        override fun run() { AdbHelper.dump() }
     }
 }

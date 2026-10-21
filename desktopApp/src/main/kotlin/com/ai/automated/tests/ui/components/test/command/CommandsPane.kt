@@ -37,6 +37,7 @@ import com.ai.automated.tests.ui.theme.Theme.Companion.TextSecondary
 import com.ai.automated.tests.util.test.node.properties.CanReceiveDataFromPrevNode
 import com.ai.automated.tests.util.test.node.CommandNode
 import com.ai.automated.tests.util.test.node.VerifyTheArea
+import com.ai.automated.tests.util.test.node.properties.CreatesBoxOnScreen
 import com.ai.automated.tests.util.test.node.properties.OutputsData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -114,7 +115,7 @@ fun ColumnScope.CommandsPane(
                                 onOverlayGeneration.invoke {  }
                                 return@ConfigureCommandCard
                             }
-                            if(commandNode is VerifyTheArea && values.size==1){
+                            if(commandNode is CreatesBoxOnScreen && values.size==1){
                                 onOverlayGeneration.invoke({ShowBoundedArea(commandNode, values)})
                             }
                         }
@@ -198,19 +199,21 @@ fun ColumnScope.CommandsPane(
 
 //-------
 @Composable
-private fun ShowBoundedArea(commandNode: CommandNode, values: List<Any>) {
+private fun ShowBoundedArea(commandNode: CreatesBoxOnScreen, values: List<Any>) {
     var width = 0
     try {
         width = values[0].toString().toInt()
     }catch (e:Exception){}
-    var left = 0
-    var top = 0
-    if(commandNode is VerifyTheArea){
-        left = commandNode.getLeft()
-        top = commandNode.getTop()
-    }
+
+    val left = commandNode.getStartOffset()
+    val top = commandNode.getTopOffset()
+
     BoundedAreaPicker(left, top, width){left, top, width, containerWidth ->
-        if(commandNode is VerifyTheArea)
-            commandNode.setArea(left, top, width, containerWidth)
+        commandNode.apply {
+            setBoxSize(width)
+            setTopOffset(top)
+            setStartOffset(left)
+            setParentContainerWidth(containerWidth)
+        }
     }
 }

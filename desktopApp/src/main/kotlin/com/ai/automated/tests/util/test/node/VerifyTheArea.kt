@@ -2,6 +2,7 @@ package com.ai.automated.tests.util.test.node
 
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import com.ai.automated.tests.util.helper.AdbHelper
+import com.ai.automated.tests.util.test.node.properties.CreatesBoxOnScreen
 import com.ai.automated.tests.util.test.node.properties.VerifyingNode
 import io.lettuce.core.LMPopArgs.Builder.right
 import java.awt.image.BufferedImage
@@ -9,11 +10,8 @@ import java.io.File
 import javax.imageio.ImageIO
 
 //--------
-class VerifyTheArea : CommandNode(
-    "verify_area",
-    "Verify Area match",
-    "Matches a particular section of the area taken from the image dump."
-), VerifyingNode {
+class VerifyTheArea : CommandNode("verify_area", "Verify Area match", "Matches a particular section of the area taken from the image dump."),
+    VerifyingNode, CreatesBoxOnScreen {
 
     companion object{
         const val DIR_PATH = "data/match_area/"
@@ -28,22 +26,26 @@ class VerifyTheArea : CommandNode(
     @Transient private var verified = false
 
     //----
-    fun setArea(left: Int, top: Int, width: Int, containerWidth: Int) {
-        this.left = left
-        this.top = top
-        this.width = width
-        this.containerWidth = containerWidth
-    }
+    override fun getBoxSize(): Int = width
+    override fun setBoxSize(width: Int) { this.width = width }
 
     //----
-    fun getLeft() = left
-    fun getTop() = top
+    override fun getStartOffset(): Int = left
+    override fun setStartOffset(offset: Int) { left = offset }
+
+    //----
+    override fun getTopOffset(): Int = top
+    override fun setTopOffset(offset: Int) { top = offset }
+
+    //----
+    override fun getParentContainerWidth(): Int = containerWidth
+    override fun setParentContainerWidth(width: Int) { containerWidth = width }
 
     //----
     init {
         configureNodeData(
             listOf(
-                NodeData("Distance from center", NodeData.ValueType.Input)
+                NodeData("Size", NodeData.ValueType.Input)
             )
         )
     }

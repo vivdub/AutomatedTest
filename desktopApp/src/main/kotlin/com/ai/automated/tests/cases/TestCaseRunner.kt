@@ -18,7 +18,7 @@ class TestCaseRunner {
 
     //----
     fun execute(commands: List<CommandNode>, onRunningNode:(CommandNode?)->Unit){
-        val dataMap = mutableMapOf<Int, Any>()
+        val dataMap = mutableMapOf<Int, Any?>()
         var start = 0L
         var verifyingNodes = 0
         var verifiedNodes = 0
